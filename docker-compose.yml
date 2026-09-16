@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  synctime:
+    build: .
+    container_name: synctime_app
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - synctime_data:/app/server/db_data
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+
+volumes:
+  synctime_data:
