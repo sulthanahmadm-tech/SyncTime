@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import type { ConflictDetail } from '../../lib/types';
 import { formatTime } from '../../lib/utils';
 
@@ -9,11 +10,31 @@ interface ConflictModalProps {
 }
 
 export const ConflictModal = ({ isOpen, conflicts, onCancel, onForceSave }: ConflictModalProps) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onCancel();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onCancel]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-gray-900 border border-red-500/30 rounded-xl shadow-2xl max-w-md w-full overflow-hidden">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto"
+      onClick={onCancel}
+    >
+      <div 
+        className="bg-gray-900 border border-red-500/30 rounded-xl shadow-2xl max-w-md w-full overflow-hidden my-auto"
+        onClick={e => e.stopPropagation()}
+      >
         <div className="bg-red-500/10 p-4 flex items-center gap-3 border-b border-red-500/20">
           <span className="text-2xl">⚠️</span>
           <h2 className="text-lg font-bold text-red-400">Jadwal Bentrok!</h2>
@@ -36,13 +57,13 @@ export const ConflictModal = ({ isOpen, conflicts, onCancel, onForceSave }: Conf
           <div className="flex justify-end gap-3">
             <button 
               onClick={onCancel}
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 text-white transition"
+              className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 active:bg-gray-600 text-white transition cursor-pointer flex items-center justify-center"
             >
               Batal
             </button>
             <button 
               onClick={onForceSave}
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 text-white transition"
+              className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 active:bg-red-800 text-white transition cursor-pointer flex items-center justify-center"
             >
               Force Save
             </button>

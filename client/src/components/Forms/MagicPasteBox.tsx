@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { magicPaste } from '../../lib/api';
 
 interface MagicPasteBoxProps {
@@ -10,6 +10,20 @@ interface MagicPasteBoxProps {
 export const MagicPasteBox = ({ isOpen, onClose, onSaved }: MagicPasteBoxProps) => {
   const [rawText, setRawText] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !loading) {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose, loading]);
 
   if (!isOpen) return null;
 
@@ -31,13 +45,24 @@ export const MagicPasteBox = ({ isOpen, onClose, onSaved }: MagicPasteBoxProps) 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-      <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden">
+    <div 
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+      onClick={() => { if (!loading) onClose(); }}
+    >
+      <div 
+        className="bg-gray-900 border border-gray-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden my-auto"
+        onClick={e => e.stopPropagation()}
+      >
         <div className="p-4 border-b border-gray-800 flex justify-between items-center">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
             ✨ Magic Paste Box
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition">
+          <button 
+            onClick={onClose} 
+            disabled={loading}
+            aria-label="Tutup"
+            className="text-gray-400 hover:text-white transition min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/10 cursor-pointer disabled:opacity-50"
+          >
             ✕
           </button>
         </div>
@@ -62,14 +87,14 @@ export const MagicPasteBox = ({ isOpen, onClose, onSaved }: MagicPasteBoxProps) 
               type="button" 
               onClick={onClose} 
               disabled={loading}
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 text-white transition disabled:opacity-50"
+              className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 active:bg-gray-600 text-white transition disabled:opacity-50 cursor-pointer flex items-center justify-center"
             >
               Batal
             </button>
             <button 
               type="submit" 
               disabled={loading}
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white transition disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? (
                 <>

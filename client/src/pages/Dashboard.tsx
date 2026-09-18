@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DndContext } from '@dnd-kit/core';
 import { Header } from '../components/Layout/Header';
 import { Sidebar } from '../components/Layout/Sidebar';
+import { BottomNavigation } from '../components/Layout/BottomNavigation';
 import { WeeklyCalendar } from '../components/Calendar/WeeklyCalendar';
 import { DragOverlay } from '../components/Calendar/DragOverlay';
 import { ConflictModal } from '../components/Calendar/ConflictModal';
@@ -84,6 +85,18 @@ const Dashboard = () => {
     setConflictModal({ isOpen: false, conflicts: [], onForce: () => {} });
   };
 
+  // Prevent background scroll passthrough when any modal or form is open
+  useEffect(() => {
+    const isAnyModalOpen = formState.type !== null || matkulWajibOpen || conflictModal.isOpen;
+    if (isAnyModalOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [formState.type, matkulWajibOpen, conflictModal.isOpen]);
+
   return (
     <div className="h-screen flex flex-col font-sans overflow-hidden bg-gray-950">
       <Header 
@@ -114,6 +127,20 @@ const Dashboard = () => {
         </div>
         <DragOverlay activeBlock={activeBlock} />
       </DndContext>
+
+      <BottomNavigation 
+        onAddRutin={() => setFormState({ type: 'rutin', editData: null })}
+        onAddDinamis={() => setFormState({ type: 'dinamis', editData: null })}
+        onAddMagicPaste={() => setFormState({ type: 'magicPaste', editData: null })}
+        onOpenMatkulWajib={() => setMatkulWajibOpen(true)}
+        isMatkulWajibOpen={matkulWajibOpen}
+        onCloseMatkulWajib={() => setMatkulWajibOpen(false)}
+        onCloseForm={() => setFormState({ type: null, editData: null })}
+        filters={filters}
+        onFilterChange={setFilters}
+        kategoriList={kategoriList}
+        weekStart={currentWeekStart}
+      />
 
       {formState.type === 'rutin' && (
         <RutinForm 

@@ -51,6 +51,20 @@ export const RutinForm = ({ isOpen, onClose, onSaved, kategoriList, onKategoriAd
     }
   }, [isOpen, editData, defaultDay, defaultTime, kategoriList]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleKategoriChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -112,8 +126,14 @@ export const RutinForm = ({ isOpen, onClose, onSaved, kategoriList, onKategoriAd
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-2xl max-w-md w-full overflow-hidden p-6 text-white">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-gray-900 border border-gray-700 rounded-xl shadow-2xl max-w-md w-full p-6 text-white my-auto"
+        onClick={e => e.stopPropagation()}
+      >
         <h2 className="text-xl font-bold mb-4">{editData ? 'Edit Jadwal Rutin' : 'Tambah Jadwal Rutin'}</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
@@ -132,8 +152,8 @@ export const RutinForm = ({ isOpen, onClose, onSaved, kategoriList, onKategoriAd
               <div className="flex gap-2">
                 <input required autoFocus type="text" placeholder="Nama Kategori" value={newKategori.nama} onChange={e => setNewKategori({...newKategori, nama: e.target.value})} className="flex-1 bg-gray-800 border border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none" />
                 <input type="color" value={newKategori.warna} onChange={e => setNewKategori({...newKategori, warna: e.target.value})} className="w-10 h-10 rounded cursor-pointer border-0 bg-transparent p-0" title="Warna Kategori" />
-                <button type="button" onClick={handleCreateKategori} className="bg-indigo-600 px-3 rounded-lg text-sm hover:bg-indigo-700 transition font-medium">Simpan</button>
-                <button type="button" onClick={() => setIsAddingKategori(false)} className="bg-gray-700 px-3 rounded-lg text-sm hover:bg-gray-600 transition font-medium">Batal</button>
+                <button type="button" onClick={handleCreateKategori} className="bg-indigo-600 px-3 min-h-[44px] rounded-lg text-sm hover:bg-indigo-700 transition font-medium cursor-pointer">Simpan</button>
+                <button type="button" onClick={() => setIsAddingKategori(false)} className="bg-gray-700 px-3 min-h-[44px] rounded-lg text-sm hover:bg-gray-600 transition font-medium cursor-pointer">Batal</button>
               </div>
             )}
           </div>
@@ -158,8 +178,8 @@ export const RutinForm = ({ isOpen, onClose, onSaved, kategoriList, onKategoriAd
             <input required type="number" min="1" value={formData.batas_minggu_berulang} onChange={e => setFormData({...formData, batas_minggu_berulang: parseInt(e.target.value)})} className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none" />
           </div>
           <div className="flex justify-end gap-3 mt-4">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 text-white transition">Batal</button>
-            <button type="submit" className="px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white transition">Simpan</button>
+            <button type="button" onClick={onClose} className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 active:bg-gray-600 text-white transition cursor-pointer flex items-center justify-center">Batal</button>
+            <button type="submit" className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white transition cursor-pointer flex items-center justify-center">Simpan</button>
           </div>
         </form>
       </div>

@@ -15,22 +15,58 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const stored = localStorage.getItem('synctime_user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [session, setSession] = useState<Session | null>(() => {
+    try {
+      const stored = localStorage.getItem('synctime_user');
+      return stored ? ({ user: JSON.parse(stored) } as any) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [loading, setLoading] = useState<boolean>(() => {
+    try {
+      return !localStorage.getItem('synctime_user');
+    } catch {
+      return true;
+    }
+  });
 
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+      if (session) {
+        setSession(session);
+        setUser(session.user);
+      } else if (!localStorage.getItem('synctime_user')) {
+        setSession(null);
+        setUser(null);
+      }
+      setLoading(false);
+    }).catch(() => {
       setLoading(false);
     });
 
     // Listen for changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: Session | null) => {
+      if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('synctime_user');
+        setSession(null);
+        setUser(null);
+      } else if (session) {
+        setSession(session);
+        setUser(session.user);
+      } else if (!localStorage.getItem('synctime_user')) {
+        setSession(null);
+        setUser(null);
+      }
       setLoading(false);
     });
 
@@ -48,7 +84,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    localStorage.removeItem('synctime_user');
+    setUser(null);
+    setSession(null);
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (

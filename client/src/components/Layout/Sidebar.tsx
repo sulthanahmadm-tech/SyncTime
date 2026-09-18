@@ -15,15 +15,40 @@ interface SidebarProps {
 
 export const Sidebar = ({ kategoriList, onAddRutin, onAddDinamis, onAddMagicPaste, onOpenMatkulWajib, filters, onFilterChange, weekStart }: SidebarProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  const handleCopyLink = () => {
+  const handleCopyLink = async () => {
     const url = `${window.location.origin}/shared?week_start=${weekStart}`;
-    navigator.clipboard.writeText(url);
-    alert('Link berhasil disalin! Bagikan ke temanmu.');
+    let success = false;
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      try {
+        await navigator.clipboard.writeText(url);
+        success = true;
+      } catch {
+        // Fallback below
+      }
+    }
+    if (!success) {
+      try {
+        const input = document.createElement('input');
+        input.value = url;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        success = true;
+      } catch {
+        // Silent failure
+      }
+    }
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 2500);
   };
 
   return (
-    <aside className="w-72 h-full bg-gray-900 border-r border-gray-800 p-4 text-white flex flex-col gap-6 overflow-y-auto">
+    <aside data-testid="desktop-sidebar" className="hidden md:flex w-72 h-full bg-gray-900 border-r border-gray-800 p-4 text-white flex-col gap-6 overflow-y-auto shrink-0">
       <div className="relative">
         <button 
           onClick={() => setMenuOpen(!menuOpen)}
@@ -50,9 +75,13 @@ export const Sidebar = ({ kategoriList, onAddRutin, onAddDinamis, onAddMagicPast
 
       <button 
         onClick={handleCopyLink}
-        className="w-full bg-gray-800 border border-gray-700 hover:bg-gray-700 text-white py-2 rounded-lg text-sm font-medium transition"
+        className={`w-full border text-sm font-medium py-2 rounded-lg transition ${
+          copied 
+            ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-400' 
+            : 'bg-gray-800 border-gray-700 hover:bg-gray-700 text-white'
+        }`}
       >
-        🔗 Copy Share Link
+        {copied ? '✓ Link Berhasil Disalin!' : '🔗 Copy Share Link'}
       </button>
 
       <div>

@@ -66,6 +66,20 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const kuliahKategori = kategoriList.find(k => k.nama_kategori.toLowerCase() === 'kuliah' || k.nama_kategori.toLowerCase() === 'matkul');
@@ -145,13 +159,26 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-2xl w-full max-w-2xl text-white my-8 max-h-[85vh] flex flex-col">
+    <div 
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+      onClick={onClose}
+      data-testid="matkul-modal-backdrop"
+    >
+      <div 
+        className="bg-gray-900 border border-gray-800 rounded-xl shadow-2xl w-full max-w-2xl text-white my-8 max-h-[85vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
+        data-testid="matkul-modal-card"
+      >
         <div className="flex justify-between items-center p-6 border-b border-gray-800 sticky top-0 bg-gray-900 z-10 rounded-t-xl">
           <h2 className="text-xl font-bold flex items-center gap-2">
             📚 Matkul Wajib
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition p-2">
+          <button 
+            onClick={onClose} 
+            data-testid="matkul-modal-close"
+            aria-label="Tutup"
+            className="text-gray-400 hover:text-white transition p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/10"
+          >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>

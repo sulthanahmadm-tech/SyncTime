@@ -71,7 +71,7 @@ export const WeeklyCalendar = ({ blocks, onBlockClick, onEmptyCellClick, onToggl
   });
 
   return (
-    <div className="flex-1 overflow-auto bg-gray-950 text-white flex">
+    <div className="flex-1 overflow-auto bg-gray-950 text-white flex pb-28 md:pb-0">
       <div className="w-16 flex-none border-r border-gray-800 bg-gray-950 sticky left-0 z-20">
         <div className="h-12 border-b border-gray-800" />
         {HOURS.map(hour => (
