@@ -10,10 +10,14 @@ export class ConflictError extends Error {
   }
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
 async function fetchApi<T>(url: string, options?: RequestInit): Promise<T> {
   // Get current session token
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token;
+  
+  const fullUrl = url.startsWith('/api') ? `${API_BASE_URL}${url}` : url;
 
   const headers: Record<string, string> = {
     ...(options?.headers as Record<string, string> || {}),
@@ -23,7 +27,7 @@ async function fetchApi<T>(url: string, options?: RequestInit): Promise<T> {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(url, {
+  const res = await fetch(fullUrl, {
     ...options,
     headers
   });
