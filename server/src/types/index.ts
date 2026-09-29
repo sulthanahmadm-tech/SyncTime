@@ -12,7 +12,6 @@ export interface Kategori {
   user_id: string;
   nama_kategori: string;
   warna_hex: string;
-  kode_led_iot: string;
 }
 
 export interface KegiatanRutin {

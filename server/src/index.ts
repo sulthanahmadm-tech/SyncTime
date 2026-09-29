@@ -13,14 +13,12 @@ import kategoriRoutes from './routes/kategori';
 import kegiatanRutinRoutes from './routes/kegiatanRutin';
 import kegiatanDinamisRoutes from './routes/kegiatanDinamis';
 import calendarRoutes from './routes/calendar';
-import iotRoutes from './routes/iot';
 import analyticsRoutes from './routes/analytics';
 import sharedRoutes from './routes/shared';
 import magicPasteRoutes from './routes/magicPaste';
 import scheduleMoveRoutes from './routes/scheduleMove';
 
 // Initialize services
-import './services/telegramBot';
 import { startCronJobs } from './services/cronJobs';
 
 const app = express();
@@ -31,7 +29,6 @@ app.use(express.json());
 
 // Public routes (no auth required)
 app.use('/api/shared', sharedRoutes);
-app.use('/api/iot', iotRoutes);
 
 // Protected routes (auth required)
 app.use('/api/auth', authMiddleware, authRoutes);

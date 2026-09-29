@@ -12,8 +12,8 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - EMAIL_FROM=${EMAIL_FROM}
 
 volumes:
   synctime_data:

@@ -50,7 +50,7 @@ async function fetchApi<T>(url: string, options?: RequestInit): Promise<T> {
 
 export const getKategori = (): Promise<Kategori[]> => fetchApi('/api/kategori');
 
-export const createKategori = (data: { nama_kategori: string, warna_hex: string, kode_led_iot?: string }): Promise<Kategori> => 
+export const createKategori = (data: { nama_kategori: string, warna_hex: string }): Promise<Kategori> => 
   fetchApi('/api/kategori', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
