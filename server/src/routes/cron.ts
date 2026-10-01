@@ -1,0 +1,28 @@
+import { Router } from 'express';
+import { checkAndSendReminders } from '../services/cronJobs';
+
+const router = Router();
+
+router.get('/trigger', async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (!cronSecret) {
+    return res.status(500).json({ error: 'CRON_SECRET is not configured on the server' });
+  }
+
+  // Expecting "Bearer <CRON_SECRET>"
+  if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
+    return res.status(401).json({ error: 'Unauthorized cron trigger' });
+  }
+
+  try {
+    await checkAndSendReminders();
+    res.status(200).json({ success: true, message: 'Cron job executed successfully' });
+  } catch (err) {
+    console.error('Failed to execute manual cron:', err);
+    res.status(500).json({ error: 'Internal server error during cron execution' });
+  }
+});
+
+export default router;

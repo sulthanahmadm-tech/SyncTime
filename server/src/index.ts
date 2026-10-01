@@ -3,7 +3,6 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
 import { errorHandler } from './middleware/errorHandler';
 import { authMiddleware } from './middleware/authMiddleware';
 
@@ -17,6 +16,7 @@ import analyticsRoutes from './routes/analytics';
 import sharedRoutes from './routes/shared';
 import magicPasteRoutes from './routes/magicPaste';
 import scheduleMoveRoutes from './routes/scheduleMove';
+import cronRoutes from './routes/cron';
 
 // Initialize services
 import { startCronJobs } from './services/cronJobs';
@@ -29,6 +29,7 @@ app.use(express.json());
 
 // Public routes (no auth required)
 app.use('/api/shared', sharedRoutes);
+app.use('/api/cron', cronRoutes);
 
 // Protected routes (auth required)
 app.use('/api/auth', authMiddleware, authRoutes);
@@ -48,7 +49,13 @@ app.get('/ping', (req, res) => {
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  startCronJobs();
-});
+// If not running in Vercel (e.g. local development), start the server and background cron
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    startCronJobs();
+  });
+}
+
+// Export for Vercel Serverless
+export default app;
