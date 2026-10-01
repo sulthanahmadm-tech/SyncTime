@@ -41,14 +41,10 @@ app.use('/api/analytics', authMiddleware, analyticsRoutes);
 app.use('/api/schedule', authMiddleware, magicPasteRoutes);
 app.use('/api/schedule', authMiddleware, scheduleMoveRoutes);
 
-// Serve static frontend files in production
-if (process.env.NODE_ENV === 'production') {
-  const clientBuildPath = path.join(__dirname, '../../client/dist');
-  app.use(express.static(clientBuildPath));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(clientBuildPath, 'index.html'));
-  });
-}
+// Simple ping route for UptimeRobot to keep the server awake
+app.get('/ping', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Server is awake' });
+});
 
 app.use(errorHandler);
 
