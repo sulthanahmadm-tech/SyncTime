@@ -57,6 +57,20 @@ export const createKategori = (data: { nama_kategori: string, warna_hex: string 
     body: JSON.stringify(data)
   });
 
+export const updateKategori = (id: number, data: { nama_kategori: string, warna_hex: string }): Promise<Kategori> => 
+  fetchApi(`/api/kategori/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+
+export const deleteKategori = (id: number): Promise<void> => 
+  fetchApi(`/api/kategori/${id}`, { method: 'DELETE' });
+
+export const getAllRutin = (): Promise<KegiatanRutin[]> => fetchApi('/api/rutin');
+export const getAllDinamis = (): Promise<KegiatanDinamis[]> => fetchApi('/api/dinamis');
+
+
 export const getWeeklyCalendar = (weekStart: string): Promise<CalendarBlock[]> => 
   fetchApi(`/api/calendar/weekly?week_start=${weekStart}`);
 

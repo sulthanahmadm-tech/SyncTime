@@ -191,6 +191,12 @@ const Dashboard = () => {
       <SettingsModal 
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
+        onEditRutin={(data) => setFormState({ type: 'rutin', editData: data })}
+        onEditDinamis={(data) => setFormState({ type: 'dinamis', editData: data })}
+        onRefresh={() => {
+          refetch();
+          refetchKategori();
+        }}
       />
 
       <ConflictModal 
