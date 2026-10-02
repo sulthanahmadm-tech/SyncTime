@@ -138,7 +138,7 @@ export const BottomNavigation = ({
       {showToast && (
         <div 
           data-testid="share-toast"
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 bg-gray-900/90 backdrop-blur-xl backdrop-saturate-150 border border-white/20 rounded-full shadow-2xl flex items-center gap-2 text-white text-sm font-medium animate-in fade-in slide-in-from-top-4"
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 bg-white dark:bg-gray-900/90 backdrop-blur-xl backdrop-saturate-150 border border-white/20 rounded-full shadow-2xl flex items-center gap-2 text-gray-900 dark:text-white text-sm font-medium animate-in fade-in slide-in-from-top-4"
         >
           <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
             <Check className="w-3.5 h-3.5" />
@@ -160,7 +160,7 @@ export const BottomNavigation = ({
           >
             {/* Sheet Card */}
             <div 
-              className="backdrop-blur-xl backdrop-saturate-150 bg-gray-900/90 border border-white/15 rounded-3xl overflow-hidden shadow-2xl divide-y divide-white/10"
+              className="backdrop-blur-xl backdrop-saturate-150 bg-white dark:bg-gray-900/90 border border-white/15 rounded-3xl overflow-hidden shadow-2xl divide-y divide-white/10"
               data-testid="action-sheet"
               style={{ 
                 borderRadius: '24px', 
@@ -172,7 +172,7 @@ export const BottomNavigation = ({
               }}
             >
               <div className="py-3 px-4 text-center">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tambah Jadwal Baru</p>
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tambah Jadwal Baru</p>
               </div>
 
               {/* Jadwal Rutin */}
@@ -184,12 +184,12 @@ export const BottomNavigation = ({
                 data-testid="action-add-rutin"
                 className="w-full min-h-[52px] px-5 py-3.5 flex items-center gap-3.5 hover:bg-white/10 active:bg-white/15 transition-colors text-left cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-500/30">
+                <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-emerald-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-emerald-500 dark:border-indigo-500/30">
                   <Calendar className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white">Jadwal Rutin</p>
-                  <p className="text-xs text-gray-400">Jadwal kuliah atau kegiatan mingguan berulang</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">Jadwal Rutin</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Jadwal kuliah atau kegiatan mingguan berulang</p>
                 </div>
               </button>
 
@@ -206,8 +206,8 @@ export const BottomNavigation = ({
                   <Clock className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white">Jadwal Dinamis</p>
-                  <p className="text-xs text-gray-400">Tugas, belajar mandiri, atau event fleksibel</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">Jadwal Dinamis</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Tugas, belajar mandiri, atau event fleksibel</p>
                 </div>
               </button>
 
@@ -225,7 +225,7 @@ export const BottomNavigation = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-amber-300">✨ Magic Paste AI</p>
-                  <p className="text-xs text-gray-400">Ekstrak jadwal instan dari teks chat / silabus</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Ekstrak jadwal instan dari teks chat / silabus</p>
                 </div>
               </button>
             </div>
@@ -234,7 +234,7 @@ export const BottomNavigation = ({
             <button
               onClick={() => setActionSheetOpen(false)}
               data-testid="action-cancel"
-              className="w-full min-h-[48px] py-3 rounded-2xl backdrop-blur-xl backdrop-saturate-150 bg-gray-900/90 hover:bg-gray-800 active:bg-gray-700 text-white font-semibold text-sm border border-white/15 transition shadow-lg text-center cursor-pointer"
+              className="w-full min-h-[48px] py-3 rounded-2xl backdrop-blur-xl backdrop-saturate-150 bg-white dark:bg-gray-900/90 hover:bg-gray-100 dark:bg-gray-800 active:bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-semibold text-sm border border-white/15 transition shadow-lg text-center cursor-pointer"
               style={{ 
                 borderRadius: '20px', 
                 WebkitBorderRadius: '20px',
@@ -258,7 +258,7 @@ export const BottomNavigation = ({
           data-testid="filter-sheet-backdrop"
         >
           <div 
-            className="w-full max-w-lg mx-auto bg-gray-900/95 backdrop-blur-xl backdrop-saturate-150 border-t border-white/15 rounded-t-3xl p-5 pb-[max(1.5rem,calc(env(safe-area-inset-bottom)+1rem))] shadow-2xl max-h-[85vh] overflow-y-auto flex flex-col gap-4 text-white animate-in slide-in-from-bottom-5 duration-200"
+            className="w-full max-w-lg mx-auto bg-white dark:bg-gray-900/95 backdrop-blur-xl backdrop-saturate-150 border-t border-white/15 rounded-t-3xl p-5 pb-[max(1.5rem,calc(env(safe-area-inset-bottom)+1rem))] shadow-2xl max-h-[85vh] overflow-y-auto flex flex-col gap-4 text-gray-900 dark:text-white animate-in slide-in-from-bottom-5 duration-200"
             onClick={e => e.stopPropagation()}
             data-testid="filter-sheet"
             style={{ 
@@ -273,17 +273,17 @@ export const BottomNavigation = ({
             }}
           >
             {/* Grab handle & sticky header */}
-            <div className="sticky -top-5 bg-gray-900/95 backdrop-blur-xl backdrop-saturate-150 pt-2 pb-3 -mt-2 -mx-5 px-5 border-b border-white/10 z-10">
+            <div className="sticky -top-5 bg-white dark:bg-gray-900/95 backdrop-blur-xl backdrop-saturate-150 pt-2 pb-3 -mt-2 -mx-5 px-5 border-b border-white/10 z-10">
               <div className="w-10 h-1 bg-gray-600 rounded-full mx-auto mb-3 shrink-0" />
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <SlidersHorizontal className="w-5 h-5 text-indigo-400" />
+                <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <SlidersHorizontal className="w-5 h-5 text-emerald-600 dark:text-indigo-400" />
                   Filter & Analisis
                 </h3>
                 <button 
                   onClick={() => setFilterSheetOpen(false)}
                   data-testid="filter-close"
-                  className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 active:bg-white/20 text-gray-400 hover:text-white flex items-center justify-center transition cursor-pointer min-w-[44px] min-h-[44px]"
+                  className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 active:bg-white/20 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-white flex items-center justify-center transition cursor-pointer min-w-[44px] min-h-[44px]"
                   aria-label="Tutup"
                 >
                   <X className="w-5 h-5" />
@@ -293,14 +293,14 @@ export const BottomNavigation = ({
 
             {/* Filter checkboxes */}
             <div>
-              <h4 className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2.5">Filter Tampilan</h4>
+              <h4 className="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2.5">Filter Tampilan</h4>
               <div className="space-y-2">
                 <label className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 hover:bg-white/10 cursor-pointer transition min-h-[44px]">
                   <input 
                     type="checkbox" 
                     checked={filters.rutin} 
                     onChange={e => onFilterChange({ ...filters, rutin: e.target.checked })} 
-                    className="w-5 h-5 rounded bg-gray-800 border-gray-600 text-indigo-500 focus:ring-indigo-500 cursor-pointer"
+                    className="w-5 h-5 rounded bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-emerald-600 dark:text-indigo-500 focus:ring-emerald-500 dark:ring-indigo-500 cursor-pointer"
                   />
                   <span className="text-sm font-medium text-gray-200">Tampilkan Jadwal Rutin</span>
                 </label>
@@ -309,7 +309,7 @@ export const BottomNavigation = ({
                     type="checkbox" 
                     checked={filters.dinamis} 
                     onChange={e => onFilterChange({ ...filters, dinamis: e.target.checked })} 
-                    className="w-5 h-5 rounded bg-gray-800 border-gray-600 text-indigo-500 focus:ring-indigo-500 cursor-pointer"
+                    className="w-5 h-5 rounded bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-emerald-600 dark:text-indigo-500 focus:ring-emerald-500 dark:ring-indigo-500 cursor-pointer"
                   />
                   <span className="text-sm font-medium text-gray-200">Tampilkan Jadwal Dinamis</span>
                 </label>
@@ -318,7 +318,7 @@ export const BottomNavigation = ({
 
             {/* Kategori list */}
             <div>
-              <h4 className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2.5">Kategori Jadwal</h4>
+              <h4 className="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2.5">Kategori Jadwal</h4>
               {kategoriList.length > 0 ? (
                 <div className="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto">
                   {kategoriList.map(kat => (
@@ -335,7 +335,7 @@ export const BottomNavigation = ({
 
             {/* Analytics CategoryChart */}
             <div className="pt-3 border-t border-white/10">
-              <h4 className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2.5">Distribusi Waktu Minggu Ini</h4>
+              <h4 className="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2.5">Distribusi Waktu Minggu Ini</h4>
               <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
                 <CategoryChart weekStart={weekStart} />
               </div>
@@ -347,7 +347,7 @@ export const BottomNavigation = ({
       {/* Main Bottom Navigation Bar (Apple HIG Tab Bar) */}
       <nav 
         data-testid="bottom-navigation-bar"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-gray-950/85 backdrop-blur-xl backdrop-saturate-150 border-t border-white/10 shadow-[0_-4px_24px_rgba(0,0,0,0.5)] select-none"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-gray-50 dark:bg-gray-950/85 backdrop-blur-xl backdrop-saturate-150 border-t border-white/10 shadow-[0_-4px_24px_rgba(0,0,0,0.5)] select-none"
       >
         <div className="flex items-center justify-around px-2 pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] py-1 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
           {/* Tab 1: Jadwal */}
@@ -360,7 +360,7 @@ export const BottomNavigation = ({
             }}
             data-testid="bottom-nav-jadwal"
             className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 cursor-pointer ${
-              isScheduleActive ? 'text-indigo-400' : 'text-gray-400 hover:text-gray-200'
+              isScheduleActive ? 'text-emerald-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-200'
             }`}
             aria-label="Jadwal Kalender"
             aria-pressed={isScheduleActive}
@@ -377,7 +377,7 @@ export const BottomNavigation = ({
             }}
             data-testid="bottom-nav-tambah"
             className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 cursor-pointer ${
-              actionSheetOpen ? 'text-indigo-400' : 'text-gray-400 hover:text-gray-200'
+              actionSheetOpen ? 'text-emerald-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-200'
             }`}
             aria-label="Tambah Jadwal"
             aria-expanded={actionSheetOpen}
@@ -399,7 +399,7 @@ export const BottomNavigation = ({
             }}
             data-testid="bottom-nav-matkul"
             className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 cursor-pointer ${
-              isMatkulWajibOpen ? 'text-indigo-400' : 'text-gray-400 hover:text-amber-400'
+              isMatkulWajibOpen ? 'text-emerald-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-amber-400'
             }`}
             aria-label="Matkul Wajib"
             aria-pressed={isMatkulWajibOpen}
@@ -416,7 +416,7 @@ export const BottomNavigation = ({
             }}
             data-testid="bottom-nav-filter"
             className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 cursor-pointer ${
-              filterSheetOpen ? 'text-indigo-400' : 'text-gray-400 hover:text-gray-200'
+              filterSheetOpen ? 'text-emerald-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-200'
             }`}
             aria-label="Filter dan Analisis"
             aria-expanded={filterSheetOpen}
@@ -429,7 +429,7 @@ export const BottomNavigation = ({
           <button
             onClick={handleCopyLink}
             data-testid="bottom-nav-share"
-            className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 text-gray-400 hover:text-sky-400 cursor-pointer"
+            className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 text-gray-500 dark:text-gray-400 hover:text-sky-400 cursor-pointer"
             aria-label="Bagikan Jadwal"
           >
             <Share2 className="w-5 h-5" />

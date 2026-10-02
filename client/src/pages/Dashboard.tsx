@@ -10,6 +10,7 @@ import { RutinForm } from '../components/Forms/RutinForm';
 import { DinamisForm } from '../components/Forms/DinamisForm';
 import { MagicPasteBox } from '../components/Forms/MagicPasteBox';
 import { MatkulWajibModal } from '../components/Forms/MatkulWajibModal';
+import { SettingsModal } from '../components/Settings/SettingsModal';
 import { useCalendarData } from '../hooks/useCalendarData';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { toggleComplete } from '../lib/api';
@@ -20,6 +21,7 @@ const Dashboard = () => {
   
   const [filters, setFilters] = useState({ rutin: true, dinamis: true });
   const [matkulWajibOpen, setMatkulWajibOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   
   const filteredBlocks = blocks.filter(b => {
     if (b.type === 'rutin' && !filters.rutin) return false;
@@ -87,7 +89,7 @@ const Dashboard = () => {
 
   // Prevent background scroll passthrough when any modal or form is open
   useEffect(() => {
-    const isAnyModalOpen = formState.type !== null || matkulWajibOpen || conflictModal.isOpen;
+    const isAnyModalOpen = formState.type !== null || matkulWajibOpen || conflictModal.isOpen || settingsOpen;
     if (isAnyModalOpen) {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
@@ -95,10 +97,10 @@ const Dashboard = () => {
         document.body.style.overflow = originalOverflow;
       };
     }
-  }, [formState.type, matkulWajibOpen, conflictModal.isOpen]);
+  }, [formState.type, matkulWajibOpen, conflictModal.isOpen, settingsOpen]);
 
   return (
-    <div className="h-screen flex flex-col font-sans overflow-hidden bg-gray-950">
+    <div className="h-screen flex flex-col font-sans overflow-hidden bg-gray-50 dark:bg-gray-950">
       <Header 
         currentWeekStart={currentWeekStart} 
         onNext={nextWeek} 
@@ -116,6 +118,7 @@ const Dashboard = () => {
             onAddMagicPaste={() => setFormState({ type: 'magicPaste', editData: null })}
             onOpenMatkulWajib={() => setMatkulWajibOpen(true)}
             weekStart={currentWeekStart}
+            onOpenSettings={() => setSettingsOpen(true)}
           />
           <WeeklyCalendar 
             blocks={filteredBlocks}
@@ -185,6 +188,11 @@ const Dashboard = () => {
         />
       )}
 
+      <SettingsModal 
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
+
       <ConflictModal 
         isOpen={conflictModal.isOpen}
         conflicts={conflictModal.conflicts}
@@ -194,27 +202,27 @@ const Dashboard = () => {
 
       {pendingMove && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 text-center">
-            <h3 className="text-lg font-bold text-white mb-2">Pindahkan Jadwal Rutin</h3>
-            <p className="text-sm text-gray-400 mb-6">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 text-center">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Pindahkan Jadwal Rutin</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
               Apakah jadwal ini digeser hanya untuk minggu ini (misal dosen berhalangan), atau pindah hari secara permanen?
             </p>
             <div className="flex flex-col gap-3">
               <button 
                 onClick={() => confirmMove(true)}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium transition"
+                className="w-full bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 text-gray-900 dark:text-white py-2 rounded-lg text-sm font-medium transition"
               >
                 Hanya untuk Minggu Ini
               </button>
               <button 
                 onClick={() => confirmMove(false)}
-                className="w-full bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg text-sm font-medium transition"
+                className="w-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 text-gray-900 dark:text-white py-2 rounded-lg text-sm font-medium transition"
               >
                 Pindah Permanen
               </button>
               <button 
                 onClick={cancelMove}
-                className="w-full mt-2 text-gray-500 hover:text-white py-2 rounded-lg text-sm font-medium transition"
+                className="w-full mt-2 text-gray-500 hover:text-gray-900 dark:text-white py-2 rounded-lg text-sm font-medium transition"
               >
                 Batal
               </button>

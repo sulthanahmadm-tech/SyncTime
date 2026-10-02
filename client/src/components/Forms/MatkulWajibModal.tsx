@@ -165,11 +165,11 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
       data-testid="matkul-modal-backdrop"
     >
       <div 
-        className="bg-gray-900 border border-gray-800 rounded-xl shadow-2xl w-full max-w-2xl text-white my-8 max-h-[85vh] flex flex-col"
+        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl w-full max-w-2xl text-gray-900 dark:text-white my-8 max-h-[85vh] flex flex-col"
         onClick={e => e.stopPropagation()}
         data-testid="matkul-modal-card"
       >
-        <div className="flex justify-between items-center p-6 border-b border-gray-800 sticky top-0 bg-gray-900 z-10 rounded-t-xl">
+        <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-800 sticky top-0 bg-white dark:bg-gray-900 z-10 rounded-t-xl">
           <h2 className="text-xl font-bold flex items-center gap-2">
             📚 Matkul Wajib
           </h2>
@@ -177,7 +177,7 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
             onClick={onClose} 
             data-testid="matkul-modal-close"
             aria-label="Tutup"
-            className="text-gray-400 hover:text-white transition p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/10"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-white transition p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/10"
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -186,11 +186,11 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
         </div>
 
         <div className="p-6 overflow-y-auto flex-1">
-          <div className="mb-8 bg-gray-800/50 p-4 rounded-lg border border-gray-700">
+          <div className="mb-8 bg-gray-100 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-300 dark:border-gray-700">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-medium text-gray-200">Periode Semester</h3>
               {!isEditingSemester && (
-                <button onClick={() => setIsEditingSemester(true)} className="text-sm text-indigo-400 hover:text-indigo-300">
+                <button onClick={() => setIsEditingSemester(true)} className="text-sm text-emerald-600 dark:text-indigo-400 hover:text-indigo-300">
                   Edit Periode
                 </button>
               )}
@@ -199,22 +199,22 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
             {isEditingSemester ? (
               <div className="flex items-end gap-4">
                 <div className="flex-1">
-                  <label className="block text-sm text-gray-400 mb-1">Mulai</label>
-                  <input type="date" value={semesterStart} onChange={e => setSemesterStart(e.target.value)} className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white" />
+                  <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Mulai</label>
+                  <input type="date" value={semesterStart} onChange={e => setSemesterStart(e.target.value)} className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white" />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-sm text-gray-400 mb-1">Selesai</label>
-                  <input type="date" value={semesterEnd} onChange={e => setSemesterEnd(e.target.value)} className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white" />
+                  <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Selesai</label>
+                  <input type="date" value={semesterEnd} onChange={e => setSemesterEnd(e.target.value)} className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white" />
                 </div>
-                <button onClick={handleSaveSemester} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded transition">
+                <button onClick={handleSaveSemester} className="bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 text-gray-900 dark:text-white px-4 py-2 rounded transition">
                   Simpan
                 </button>
-                <button onClick={() => setIsEditingSemester(false)} className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+                <button onClick={() => setIsEditingSemester(false)} className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 text-gray-900 dark:text-white px-4 py-2 rounded transition">
                   Batal
                 </button>
               </div>
             ) : (
-              <p className="text-gray-300">
+              <p className="text-gray-600 dark:text-gray-300">
                 {profile?.semester_start ? new Date(profile.semester_start).toLocaleDateString() : 'Belum diatur'} 
                 {' - '}
                 {profile?.semester_end ? new Date(profile.semester_end).toLocaleDateString() : 'Belum diatur'}
@@ -227,30 +227,30 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
             {matkulList.length === 0 && <p className="text-gray-500 text-sm">Belum ada matkul wajib.</p>}
             
             {matkulList.map(m => (
-              <div key={m.id} className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+              <div key={m.id} className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4">
                 {editingId === m.id ? (
                   <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                     <div className="col-span-2 sm:col-span-4">
-                      <input type="text" value={editForm.judul} onChange={e => setEditForm({...editForm, judul: e.target.value})} placeholder="Nama Matkul" className="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white" />
+                      <input type="text" value={editForm.judul} onChange={e => setEditForm({...editForm, judul: e.target.value})} placeholder="Nama Matkul" className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white" />
                     </div>
-                    <select value={editForm.hari_mingguan} onChange={e => setEditForm({...editForm, hari_mingguan: parseInt(e.target.value)})} className="bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white">
+                    <select value={editForm.hari_mingguan} onChange={e => setEditForm({...editForm, hari_mingguan: parseInt(e.target.value)})} className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white">
                       {[1,2,3,4,5,6,7].map(h => <option key={h} value={h}>{HARI_MAP[h]}</option>)}
                     </select>
-                    <input type="time" value={editForm.jam_mulai} onChange={e => setEditForm({...editForm, jam_mulai: e.target.value})} className="bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white" />
-                    <input type="time" value={editForm.jam_selesai} onChange={e => setEditForm({...editForm, jam_selesai: e.target.value})} className="bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white" />
+                    <input type="time" value={editForm.jam_mulai} onChange={e => setEditForm({...editForm, jam_mulai: e.target.value})} className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white" />
+                    <input type="time" value={editForm.jam_selesai} onChange={e => setEditForm({...editForm, jam_selesai: e.target.value})} className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white" />
                     <div className="flex gap-2">
-                      <button onClick={() => handleUpdateMatkul(m.id)} className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded py-2 transition text-sm">Simpan</button>
-                      <button onClick={() => setEditingId(null)} className="flex-1 bg-gray-700 hover:bg-gray-600 text-white rounded py-2 transition text-sm">Batal</button>
+                      <button onClick={() => handleUpdateMatkul(m.id)} className="flex-1 bg-green-600 hover:bg-green-700 text-gray-900 dark:text-white rounded py-2 transition text-sm">Simpan</button>
+                      <button onClick={() => setEditingId(null)} className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 text-gray-900 dark:text-white rounded py-2 transition text-sm">Batal</button>
                     </div>
                   </div>
                 ) : (
                   <div className="flex justify-between items-center">
                     <div>
                       <h4 className="font-semibold text-lg">{m.judul}</h4>
-                      <p className="text-gray-400 text-sm">{HARI_MAP[m.hari_mingguan]} • {m.jam_mulai.slice(0,5)} - {m.jam_selesai.slice(0,5)}</p>
+                      <p className="text-gray-500 dark:text-gray-400 text-sm">{HARI_MAP[m.hari_mingguan]} • {m.jam_mulai.slice(0,5)} - {m.jam_selesai.slice(0,5)}</p>
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => startEdit(m)} className="p-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition">Edit</button>
+                      <button onClick={() => startEdit(m)} className="p-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 rounded text-sm transition">Edit</button>
                       <button onClick={() => handleDelete(m.id)} className="p-2 bg-red-900/50 hover:bg-red-800 text-red-200 rounded text-sm transition">Hapus</button>
                     </div>
                   </div>
@@ -260,24 +260,24 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
           </div>
 
           {!isAdding ? (
-            <button onClick={() => setIsAdding(true)} className="w-full border-2 border-dashed border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 py-4 rounded-lg transition font-medium">
+            <button onClick={() => setIsAdding(true)} className="w-full border-2 border-dashed border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-white hover:border-gray-500 py-4 rounded-lg transition font-medium">
               + Tambah Matkul Baru
             </button>
           ) : (
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+            <div className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4">
               <h4 className="font-medium mb-3">Tambah Matkul Baru</h4>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <div className="col-span-2 sm:col-span-4">
-                  <input type="text" value={newMatkul.judul} onChange={e => setNewMatkul({...newMatkul, judul: e.target.value})} placeholder="Nama Matkul" className="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white" />
+                  <input type="text" value={newMatkul.judul} onChange={e => setNewMatkul({...newMatkul, judul: e.target.value})} placeholder="Nama Matkul" className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white" />
                 </div>
-                <select value={newMatkul.hari_mingguan} onChange={e => setNewMatkul({...newMatkul, hari_mingguan: parseInt(e.target.value)})} className="bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white">
+                <select value={newMatkul.hari_mingguan} onChange={e => setNewMatkul({...newMatkul, hari_mingguan: parseInt(e.target.value)})} className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white">
                   {[1,2,3,4,5,6,7].map(h => <option key={h} value={h}>{HARI_MAP[h]}</option>)}
                 </select>
-                <input type="time" value={newMatkul.jam_mulai} onChange={e => setNewMatkul({...newMatkul, jam_mulai: e.target.value})} className="bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white" />
-                <input type="time" value={newMatkul.jam_selesai} onChange={e => setNewMatkul({...newMatkul, jam_selesai: e.target.value})} className="bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white" />
+                <input type="time" value={newMatkul.jam_mulai} onChange={e => setNewMatkul({...newMatkul, jam_mulai: e.target.value})} className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white" />
+                <input type="time" value={newMatkul.jam_selesai} onChange={e => setNewMatkul({...newMatkul, jam_selesai: e.target.value})} className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white" />
                 <div className="col-span-2 sm:col-span-4 flex gap-3 mt-2">
-                  <button onClick={handleAddMatkul} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded py-2 transition font-medium">Simpan Matkul</button>
-                  <button onClick={() => setIsAdding(false)} className="flex-1 bg-gray-700 hover:bg-gray-600 text-white rounded py-2 transition font-medium">Batal</button>
+                  <button onClick={handleAddMatkul} className="flex-1 bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 text-gray-900 dark:text-white rounded py-2 transition font-medium">Simpan Matkul</button>
+                  <button onClick={() => setIsAdding(false)} className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 text-gray-900 dark:text-white rounded py-2 transition font-medium">Batal</button>
                 </div>
               </div>
             </div>

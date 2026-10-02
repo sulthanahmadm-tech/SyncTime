@@ -32,7 +32,7 @@ export const ConflictModal = ({ isOpen, conflicts, onCancel, onForceSave }: Conf
       onClick={onCancel}
     >
       <div 
-        className="bg-gray-900 border border-red-500/30 rounded-xl shadow-2xl max-w-md w-full overflow-hidden my-auto"
+        className="bg-white dark:bg-gray-900 border border-red-500/30 rounded-xl shadow-2xl max-w-md w-full overflow-hidden my-auto"
         onClick={e => e.stopPropagation()}
       >
         <div className="bg-red-500/10 p-4 flex items-center gap-3 border-b border-red-500/20">
@@ -40,16 +40,16 @@ export const ConflictModal = ({ isOpen, conflicts, onCancel, onForceSave }: Conf
           <h2 className="text-lg font-bold text-red-400">Jadwal Bentrok!</h2>
         </div>
         <div className="p-6">
-          <p className="text-gray-300 text-sm mb-4">
+          <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
             Jadwal yang Anda buat bertabrakan dengan kegiatan berikut:
           </p>
           <div className="max-h-48 overflow-y-auto flex flex-col gap-3 mb-6">
             {conflicts.map(c => (
-              <div key={c.conflicting_id} className="bg-gray-800 p-3 rounded-lg border border-gray-700">
-                <div className="font-semibold text-white">{c.conflicting_judul}</div>
-                <div className="text-xs text-gray-400 mt-1 flex justify-between">
+              <div key={c.conflicting_id} className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg border border-gray-300 dark:border-gray-700">
+                <div className="font-semibold text-gray-900 dark:text-white">{c.conflicting_judul}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex justify-between">
                   <span>{formatTime(c.conflicting_start)} - {formatTime(c.conflicting_end)}</span>
-                  <span className="uppercase bg-gray-700 px-2 py-0.5 rounded text-[10px]">{c.type}</span>
+                  <span className="uppercase bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded text-[10px]">{c.type}</span>
                 </div>
               </div>
             ))}
@@ -57,13 +57,13 @@ export const ConflictModal = ({ isOpen, conflicts, onCancel, onForceSave }: Conf
           <div className="flex justify-end gap-3">
             <button 
               onClick={onCancel}
-              className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 active:bg-gray-600 text-white transition cursor-pointer flex items-center justify-center"
+              className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:bg-gray-700 active:bg-gray-600 text-gray-900 dark:text-white transition cursor-pointer flex items-center justify-center"
             >
               Batal
             </button>
             <button 
               onClick={onForceSave}
-              className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 active:bg-red-800 text-white transition cursor-pointer flex items-center justify-center"
+              className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 active:bg-red-800 text-gray-900 dark:text-white transition cursor-pointer flex items-center justify-center"
             >
               Force Save
             </button>

@@ -1,9 +1,33 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:is(.dark *));
+
 @layer base {
   html, body {
     overscroll-behavior-y: none;
     -webkit-overflow-scrolling: touch;
     -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Modern Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: #d1d5db; /* gray-300 */
+    border-radius: 10px;
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background-color: #374151; /* gray-700 */
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #9ca3af; /* gray-400 */
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background-color: #4b5563; /* gray-600 */
   }
 }

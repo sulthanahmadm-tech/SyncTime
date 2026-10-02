@@ -28,10 +28,10 @@ const DayColumn = ({ date, blocks, onBlockClick, onEmptyCellClick, onToggleCompl
   const currentMinutePosition = isToday ? (now.getHours() - 6) * 60 + now.getMinutes() : null;
 
   return (
-    <div ref={setNodeRef} className="flex-1 border-r border-gray-800 relative bg-gray-900 min-w-[120px]">
-      <div className="h-12 border-b border-gray-800 flex flex-col items-center justify-center sticky top-0 bg-gray-900 z-10">
-        <span className="text-sm font-medium text-gray-400">{DAY_NAMES[date.getDay() === 0 ? 6 : date.getDay() - 1]}</span>
-        <span className={`text-lg ${isToday ? 'bg-indigo-600 w-8 h-8 rounded-full flex items-center justify-center text-white' : 'text-gray-200'}`}>
+    <div ref={setNodeRef} className="flex-1 border-r border-gray-200 dark:border-gray-800 relative bg-white dark:bg-gray-900 min-w-[120px]">
+      <div className="h-12 border-b border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center sticky top-0 bg-white dark:bg-gray-900 z-10">
+        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{DAY_NAMES[date.getDay() === 0 ? 6 : date.getDay() - 1]}</span>
+        <span className={`text-lg ${isToday ? 'bg-emerald-600 dark:bg-indigo-600 w-8 h-8 rounded-full flex items-center justify-center text-gray-900 dark:text-white' : 'text-gray-200'}`}>
           {date.getDate()}
         </span>
       </div>
@@ -39,7 +39,7 @@ const DayColumn = ({ date, blocks, onBlockClick, onEmptyCellClick, onToggleCompl
         {HOURS.map(hour => (
           <div 
             key={hour} 
-            className="h-[60px] border-b border-gray-800/50 cursor-pointer hover:bg-gray-800/30 transition"
+            className="h-[60px] border-b border-gray-200 dark:border-gray-800/50 cursor-pointer hover:bg-gray-100 dark:bg-gray-800/30 transition"
             onClick={() => onEmptyCellClick(dateStr, hour)}
           />
         ))}
@@ -71,9 +71,9 @@ export const WeeklyCalendar = ({ blocks, onBlockClick, onEmptyCellClick, onToggl
   });
 
   return (
-    <div className="flex-1 overflow-auto bg-gray-950 text-white flex pb-28 md:pb-0">
-      <div className="w-16 flex-none border-r border-gray-800 bg-gray-950 sticky left-0 z-20">
-        <div className="h-12 border-b border-gray-800" />
+    <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white flex pb-28 md:pb-0">
+      <div className="w-16 flex-none border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 sticky left-0 z-20">
+        <div className="h-12 border-b border-gray-200 dark:border-gray-800" />
         {HOURS.map(hour => (
           <div key={hour} className="h-[60px] relative">
             <span className="absolute -top-3 right-2 text-xs text-gray-500">

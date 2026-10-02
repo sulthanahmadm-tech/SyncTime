@@ -33,16 +33,16 @@ export const SharedCalendar = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col font-sans overflow-hidden bg-gray-950 text-white">
+    <div className="h-screen flex flex-col font-sans overflow-hidden bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white">
       <Header 
         currentWeekStart={weekStartParam} 
         onNext={handleNext} 
         onPrev={handlePrev} 
         onToday={handleToday} 
       />
-      <div className="p-4 bg-gray-900 border-b border-gray-800 text-center">
+      <div className="p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 text-center">
         <h2 className="text-xl font-bold">Waktu Tersedia (Free Time)</h2>
-        <p className="text-sm text-gray-400">Blok abu-abu menandakan waktu sibuk. Area kosong adalah waktu yang tersedia.</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Blok abu-abu menandakan waktu sibuk. Area kosong adalah waktu yang tersedia.</p>
       </div>
       <div className="flex-1 flex overflow-hidden pointer-events-none">
         {/* pointer-events-none ensures it's completely read-only visually (no hover effects on blocks either) */}

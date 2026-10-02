@@ -2,6 +2,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import type { CalendarBlock } from '../../lib/types';
 import { getBlockPosition, formatTime } from '../../lib/utils';
+import { Checkbox } from '../UI/Checkbox';
 
 interface TimeBlockProps {
   block: CalendarBlock;
@@ -46,16 +47,14 @@ export const TimeBlock = ({ block, onClick, onToggleComplete }: TimeBlockProps) 
           {block.judul}
         </div>
         {block.type === 'dinamis' && (
-          <input 
-            type="checkbox" 
-            checked={!!block.is_completed}
-            onChange={(e) => {
-              e.stopPropagation();
-              onToggleComplete();
-            }}
-            className="w-3 h-3 mt-0.5 rounded cursor-pointer"
-            onPointerDown={(e) => e.stopPropagation()}
-          />
+          <div onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
+            <Checkbox 
+              checked={!!block.is_completed}
+              onChange={() => onToggleComplete()}
+              variant="pop"
+              size="sm"
+            />
+          </div>
         )}
       </div>
       <div className="text-[10px] text-black/80 font-medium mt-0.5 flex justify-between">

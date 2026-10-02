@@ -67,7 +67,7 @@ export const UserProfilePopover = () => {
         {/* Avatar */}
         <div 
           data-testid="user-avatar"
-          className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 via-indigo-600 to-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-md ring-1 ring-white/20 shrink-0 overflow-hidden"
+          className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 via-indigo-600 to-purple-600 text-gray-900 dark:text-white flex items-center justify-center font-bold text-xs shadow-md ring-1 ring-white/20 shrink-0 overflow-hidden"
         >
           {avatarUrl ? (
             <img 
@@ -92,7 +92,7 @@ export const UserProfilePopover = () => {
 
         {/* Chevron icon */}
         <ChevronDown 
-          className={`w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180 text-white' : ''}`} 
+          className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180 text-gray-900 dark:text-white' : ''}`} 
         />
       </button>
 
@@ -104,7 +104,7 @@ export const UserProfilePopover = () => {
           role="dialog"
           aria-modal="true"
           aria-label="User Profile"
-          className="absolute right-0 top-full mt-2 w-72 sm:w-80 max-w-[calc(100vw-1.5rem)] z-50 backdrop-blur-xl backdrop-saturate-150 bg-gray-900/85 border border-white/15 shadow-[0_16px_40px_rgba(0,0,0,0.6)] rounded-[20px] ring-1 ring-white/10 text-white p-4 animate-in fade-in zoom-in-95 duration-150"
+          className="absolute right-0 top-full mt-2 w-72 sm:w-80 max-w-[calc(100vw-1.5rem)] z-50 backdrop-blur-xl backdrop-saturate-150 bg-white dark:bg-gray-900/85 border border-white/15 shadow-[0_16px_40px_rgba(0,0,0,0.6)] rounded-[20px] ring-1 ring-white/10 text-gray-900 dark:text-white p-4 animate-in fade-in zoom-in-95 duration-150"
           style={{
             borderRadius: '20px',
             WebkitBorderRadius: '20px',
@@ -116,7 +116,7 @@ export const UserProfilePopover = () => {
         >
           {/* Header Info with Avatar & Email */}
           <div className="flex items-start gap-3.5 pb-3 border-b border-white/10">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-purple-600 text-white flex items-center justify-center font-bold text-xl shadow-lg ring-2 ring-white/20 shrink-0 overflow-hidden">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-purple-600 text-gray-900 dark:text-white flex items-center justify-center font-bold text-xl shadow-lg ring-2 ring-white/20 shrink-0 overflow-hidden">
               {avatarUrl ? (
                 <img 
                   src={avatarUrl} 
@@ -129,7 +129,7 @@ export const UserProfilePopover = () => {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-white text-sm sm:text-base truncate" title={displayName}>
+              <p className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate" title={displayName}>
                 {displayName}
               </p>
               <div className="flex items-center gap-1.5 mt-1">
@@ -142,16 +142,16 @@ export const UserProfilePopover = () => {
           {/* Account Details */}
           <div className="my-3 space-y-2">
             <div className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/5 border border-white/5 text-xs">
-              <span className="text-gray-400 flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-indigo-400" />
                 SyncTime ID
               </span>
-              <span className="font-mono text-gray-300">
+              <span className="font-mono text-gray-600 dark:text-gray-300">
                 {user.id ? `${user.id.slice(0, 8)}...` : 'User'}
               </span>
             </div>
             <div className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/5 border border-white/5 text-xs">
-              <span className="text-gray-400 flex items-center gap-1.5">
+              <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                 Fitur AI
               </span>

@@ -15,7 +15,7 @@ export const CategoryChart = ({ weekStart }: { weekStart: string }) => {
 
   return (
     <div className="h-64 w-full mt-4">
-      <h3 className="text-sm font-semibold text-gray-300 mb-2">Distribusi Waktu (Jam)</h3>
+      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2">Distribusi Waktu (Jam)</h3>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie

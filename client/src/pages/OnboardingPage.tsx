@@ -147,7 +147,7 @@ const OnboardingPage: React.FC = () => {
             {[1, 2, 3].map((s) => (
               <div 
                 key={s} 
-                className={`h-2.5 rounded-full transition-all duration-300 ${s === step ? 'w-8 bg-indigo-600' : s < step ? 'w-4 bg-indigo-300' : 'w-4 bg-gray-200'}`}
+                className={`h-2.5 rounded-full transition-all duration-300 ${s === step ? 'w-8 bg-emerald-600 dark:bg-indigo-600' : s < step ? 'w-4 bg-indigo-300' : 'w-4 bg-gray-200'}`}
               />
             ))}
           </div>
@@ -184,7 +184,7 @@ const OnboardingPage: React.FC = () => {
                       type="date"
                       value={semesterStart}
                       onChange={(e) => setSemesterStart(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 focus:border-emerald-500 dark:border-indigo-500 transition-colors"
                       required
                     />
                   </div>
@@ -194,7 +194,7 @@ const OnboardingPage: React.FC = () => {
                       type="date"
                       value={semesterEnd}
                       onChange={(e) => setSemesterEnd(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 focus:border-emerald-500 dark:border-indigo-500 transition-colors"
                       required
                     />
                   </div>
@@ -209,7 +209,7 @@ const OnboardingPage: React.FC = () => {
                   <button 
                     type="submit"
                     disabled={loading}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-8 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-70"
+                    className="bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 text-gray-900 dark:text-white font-medium py-3 px-8 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-70"
                   >
                     {loading ? 'Menyimpan...' : 'Lanjut'}
                     {!loading && <span>&rarr;</span>}
@@ -272,7 +272,7 @@ const OnboardingPage: React.FC = () => {
                           type="text"
                           value={newMatkul.judul}
                           onChange={(e) => setNewMatkul({...newMatkul, judul: e.target.value})}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 focus:border-emerald-500 dark:border-indigo-500 transition-colors"
                           placeholder="Misal: Algoritma dan Pemrograman"
                         />
                       </div>
@@ -282,7 +282,7 @@ const OnboardingPage: React.FC = () => {
                         <select 
                           value={newMatkul.hari_mingguan}
                           onChange={(e) => setNewMatkul({...newMatkul, hari_mingguan: Number(e.target.value)})}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 focus:border-emerald-500 dark:border-indigo-500 transition-colors"
                         >
                           {Object.entries(DAY_MAP).map(([val, label]) => (
                             <option key={val} value={val}>{label}</option>
@@ -297,7 +297,7 @@ const OnboardingPage: React.FC = () => {
                             type="time"
                             value={newMatkul.jam_mulai}
                             onChange={(e) => setNewMatkul({...newMatkul, jam_mulai: e.target.value})}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 focus:border-emerald-500 dark:border-indigo-500 transition-colors"
                           />
                         </div>
                         <div className="space-y-1">
@@ -306,7 +306,7 @@ const OnboardingPage: React.FC = () => {
                             type="time"
                             value={newMatkul.jam_selesai}
                             onChange={(e) => setNewMatkul({...newMatkul, jam_selesai: e.target.value})}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 focus:border-emerald-500 dark:border-indigo-500 transition-colors"
                           />
                         </div>
                       </div>
@@ -333,7 +333,7 @@ const OnboardingPage: React.FC = () => {
                 <button 
                   onClick={handleStep2Submit}
                   disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-8 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-70"
+                  className="bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 text-gray-900 dark:text-white font-medium py-3 px-8 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-70"
                 >
                   {loading ? 'Menyimpan...' : 'Lanjut'}
                   {!loading && <span>&rarr;</span>}
@@ -375,7 +375,7 @@ const OnboardingPage: React.FC = () => {
               <button 
                 onClick={handleStep3Submit}
                 disabled={loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-xl transition-colors shadow-lg shadow-indigo-200 flex justify-center items-center gap-2"
+                className="w-full bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 text-gray-900 dark:text-white font-bold py-4 px-8 rounded-xl transition-colors shadow-lg shadow-indigo-200 flex justify-center items-center gap-2"
               >
                 {loading ? 'Memproses...' : 'Masuk ke Dashboard'}
                 {!loading && <span>&rarr;</span>}

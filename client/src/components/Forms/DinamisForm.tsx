@@ -139,43 +139,43 @@ export const DinamisForm = ({ isOpen, onClose, onSaved, kategoriList, onKategori
       onClick={onClose}
     >
       <div 
-        className="bg-gray-900 border border-gray-700 rounded-xl shadow-2xl max-w-md w-full p-6 text-white my-auto"
+        className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl shadow-2xl max-w-md w-full p-6 text-gray-900 dark:text-white my-auto"
         onClick={e => e.stopPropagation()}
       >
         <h2 className="text-xl font-bold mb-4">{editData ? 'Edit Jadwal Dinamis' : 'Tambah Jadwal Dinamis'}</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">Judul</label>
-            <input required type="text" value={formData.judul} onChange={e => setFormData({...formData, judul: e.target.value})} className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none" />
+            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Judul</label>
+            <input required type="text" value={formData.judul} onChange={e => setFormData({...formData, judul: e.target.value})} className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 outline-none" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">Kategori</label>
+            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Kategori</label>
             {!isAddingKategori ? (
-              <select required value={formData.kategori_id} onChange={handleKategoriChange} className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+              <select required value={formData.kategori_id} onChange={handleKategoriChange} className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 outline-none">
                 <option value="" disabled>Pilih Kategori...</option>
                 {kategoriList.map(k => <option key={k.id} value={k.id}>{k.nama_kategori}</option>)}
-                <option value="new" className="font-bold text-indigo-400">+ Tambah Kategori Baru</option>
+                <option value="new" className="font-bold text-emerald-600 dark:text-indigo-400">+ Tambah Kategori Baru</option>
               </select>
             ) : (
               <div className="flex gap-2">
-                <input required autoFocus type="text" placeholder="Nama Kategori" value={newKategori.nama} onChange={e => setNewKategori({...newKategori, nama: e.target.value})} className="flex-1 bg-gray-800 border border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none" />
+                <input required autoFocus type="text" placeholder="Nama Kategori" value={newKategori.nama} onChange={e => setNewKategori({...newKategori, nama: e.target.value})} className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 outline-none" />
                 <input type="color" value={newKategori.warna} onChange={e => setNewKategori({...newKategori, warna: e.target.value})} className="w-10 h-10 rounded cursor-pointer border-0 bg-transparent p-0" title="Warna Kategori" />
-                <button type="button" onClick={handleCreateKategori} className="bg-indigo-600 px-3 min-h-[44px] rounded-lg text-sm hover:bg-indigo-700 transition font-medium cursor-pointer">Simpan</button>
-                <button type="button" onClick={() => setIsAddingKategori(false)} className="bg-gray-700 px-3 min-h-[44px] rounded-lg text-sm hover:bg-gray-600 transition font-medium cursor-pointer">Batal</button>
+                <button type="button" onClick={handleCreateKategori} className="bg-emerald-600 dark:bg-indigo-600 px-3 min-h-[44px] rounded-lg text-sm hover:bg-emerald-700 dark:bg-indigo-700 transition font-medium cursor-pointer">Simpan</button>
+                <button type="button" onClick={() => setIsAddingKategori(false)} className="bg-gray-200 dark:bg-gray-700 px-3 min-h-[44px] rounded-lg text-sm hover:bg-gray-600 transition font-medium cursor-pointer">Batal</button>
               </div>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">Tanggal & Jam Mulai</label>
-            <input required type="datetime-local" value={formData.waktu_mulai} onChange={e => setFormData({...formData, waktu_mulai: e.target.value})} className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none" />
+            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Tanggal & Jam Mulai</label>
+            <input required type="datetime-local" value={formData.waktu_mulai} onChange={e => setFormData({...formData, waktu_mulai: e.target.value})} className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 outline-none" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">Tanggal & Jam Selesai</label>
-            <input required type="datetime-local" value={formData.waktu_selesai} onChange={e => setFormData({...formData, waktu_selesai: e.target.value})} className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none" />
+            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Tanggal & Jam Selesai</label>
+            <input required type="datetime-local" value={formData.waktu_selesai} onChange={e => setFormData({...formData, waktu_selesai: e.target.value})} className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 outline-none" />
           </div>
           <div className="flex justify-end gap-3 mt-4">
-            <button type="button" onClick={onClose} className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 active:bg-gray-600 text-white transition cursor-pointer flex items-center justify-center">Batal</button>
-            <button type="submit" className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white transition cursor-pointer flex items-center justify-center">Simpan</button>
+            <button type="button" onClick={onClose} className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:bg-gray-700 active:bg-gray-600 text-gray-900 dark:text-white transition cursor-pointer flex items-center justify-center">Batal</button>
+            <button type="submit" className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 active:bg-indigo-800 text-gray-900 dark:text-white transition cursor-pointer flex items-center justify-center">Simpan</button>
           </div>
         </form>
       </div>

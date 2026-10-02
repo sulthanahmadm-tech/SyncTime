@@ -97,7 +97,7 @@ const LoginPage = () => {
               <input
                 type="email"
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 focus:border-emerald-500 dark:border-indigo-500 outline-none transition-all"
                 placeholder="email@kampus.ac.id"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -109,7 +109,7 @@ const LoginPage = () => {
               <input
                 type="password"
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 focus:border-emerald-500 dark:border-indigo-500 outline-none transition-all"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -119,7 +119,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all disabled:opacity-70 flex items-center justify-center mt-6"
+              className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-gray-900 dark:text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all disabled:opacity-70 flex items-center justify-center mt-6"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
