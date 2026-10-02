@@ -227,7 +227,6 @@ export const SettingsModal = ({ isOpen, onClose, onEditRutin, onEditDinamis, onR
               <div className="max-w-4xl flex flex-col gap-4">
                 {dinamisList.map(d => {
                   const start = new Date(d.waktu_mulai);
-                  const end = new Date(d.waktu_selesai);
                   return (
                     <div key={d.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-950 hover:border-emerald-500 transition">
                       <div>
