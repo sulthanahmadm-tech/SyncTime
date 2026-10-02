@@ -67,7 +67,7 @@ export const useDragAndDrop = (blocks: CalendarBlock[], refetch: () => void) => 
     const duration = endDate.getTime() - new Date(block.start).getTime();
     endDate.setTime(startDate.getTime() + duration);
 
-    const formatTime = (d: Date) => d.toISOString().split('T')[1].substring(0, 8);
+    const formatTime = (d: Date) => d.toTimeString().split(' ')[0];
     
     const payload = {
       id: block.id,
@@ -75,6 +75,8 @@ export const useDragAndDrop = (blocks: CalendarBlock[], refetch: () => void) => 
       newDate: dropDate,
       newStartTime: formatTime(startDate),
       newEndTime: formatTime(endDate),
+      newStartIso: startDate.toISOString(),
+      newEndIso: endDate.toISOString(),
       originalDate: block.start.split('T')[0]
     };
 

@@ -58,8 +58,8 @@ export async function checkConflicts(
     conflicts.push({
       conflicting_id: row.id,
       conflicting_judul: row.judul,
-      conflicting_start: new Date(startStr).toISOString(),
-      conflicting_end: new Date(endStr).toISOString(),
+      conflicting_start: startStr,
+      conflicting_end: endStr,
       type: 'rutin'
     });
   }

@@ -53,8 +53,8 @@ router.get('/free-time', async (req, res, next) => {
         type: 'rutin',
         judul: 'Sibuk',
         warna_hex: '#6B7280',
-        start: new Date(startDateTimeStr).toISOString(),
-        end: new Date(endDateTimeStr).toISOString(),
+        start: startDateTimeStr,
+        end: endDateTimeStr,
       });
     }
 

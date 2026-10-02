@@ -125,11 +125,13 @@ export const magicPaste = (rawText: string): Promise<{ message: string, data: an
   });
 
 export const moveSchedule = (payload: {
-  id: number;
+  id: number | string;
   type: 'rutin' | 'dinamis';
   newDate: string;
   newStartTime: string;
   newEndTime: string;
+  newStartIso?: string;
+  newEndIso?: string;
   isTemporary?: boolean;
   originalDate?: string;
 }): Promise<{ message: string }> => 
