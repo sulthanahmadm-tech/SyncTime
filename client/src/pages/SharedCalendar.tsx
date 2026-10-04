@@ -9,28 +9,39 @@ import { getWeekStart } from '../lib/utils';
 export const SharedCalendar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const weekStartParam = searchParams.get('week_start') || getWeekStart(new Date());
+  const userId = searchParams.get('user_id');
   
   const [blocks, setBlocks] = useState<CalendarBlock[]>([]);
 
   useEffect(() => {
-    getSharedFreeTime(weekStartParam).then(setBlocks).catch(console.error);
-  }, [weekStartParam]);
+    if (userId) {
+      getSharedFreeTime(weekStartParam, userId).then(setBlocks).catch(console.error);
+    }
+  }, [weekStartParam, userId]);
 
   const handleNext = () => {
     const d = new Date(weekStartParam);
     d.setDate(d.getDate() + 7);
-    setSearchParams({ week_start: getWeekStart(d) });
+    setSearchParams({ week_start: getWeekStart(d), user_id: userId || '' });
   };
 
   const handlePrev = () => {
     const d = new Date(weekStartParam);
     d.setDate(d.getDate() - 7);
-    setSearchParams({ week_start: getWeekStart(d) });
+    setSearchParams({ week_start: getWeekStart(d), user_id: userId || '' });
   };
 
   const handleToday = () => {
-    setSearchParams({ week_start: getWeekStart(new Date()) });
+    setSearchParams({ week_start: getWeekStart(new Date()), user_id: userId || '' });
   };
+
+  if (!userId || userId === 'undefined') {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center font-sans bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white">
+        <h2 className="text-xl font-bold">Parameter user_id tidak ditemukan</h2>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex flex-col font-sans overflow-hidden bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white">

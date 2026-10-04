@@ -25,6 +25,7 @@ interface BottomNavigationProps {
   onFilterChange: (filters: { rutin: boolean; dinamis: boolean }) => void;
   kategoriList: Kategori[];
   weekStart: string;
+  userId?: string;
 }
 
 export const BottomNavigation = ({
@@ -39,6 +40,7 @@ export const BottomNavigation = ({
   onFilterChange,
   kategoriList,
   weekStart,
+  userId,
 }: BottomNavigationProps) => {
   const [actionSheetOpen, setActionSheetOpen] = useState(false);
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
@@ -91,7 +93,7 @@ export const BottomNavigation = ({
       setShowToast(false);
     }, 2500);
 
-    const url = `${window.location.origin}/shared?week_start=${weekStart}`;
+    const url = `${window.location.origin}/shared?week_start=${weekStart}${userId ? `&user_id=${userId}` : ''}`;
     if (typeof navigator.share === 'function') {
       try {
         await navigator.share({

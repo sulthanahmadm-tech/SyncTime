@@ -20,7 +20,7 @@ async function fetchApi<T>(url: string, options?: RequestInit): Promise<T> {
   const fullUrl = url.startsWith('/api') ? `${API_BASE_URL}${url}` : url;
 
   const headers: Record<string, string> = {
-    ...(options?.headers as Record<string, string> || {}),
+    ...(options?.headers as Record<string, string>),
   };
 
   if (token) {
@@ -114,8 +114,8 @@ export const deleteDinamis = (id: number): Promise<void> =>
 export const getAnalytics = (weekStart: string): Promise<{ nama_kategori: string, warna_hex: string, total_hours: number }[]> => 
   fetchApi(`/api/analytics/weekly?week_start=${weekStart}`);
 
-export const getSharedFreeTime = (weekStart: string): Promise<CalendarBlock[]> => 
-  fetchApi(`/api/shared/free-time?week_start=${weekStart}`);
+export const getSharedFreeTime = (weekStart: string, userId: string): Promise<CalendarBlock[]> => 
+  fetchApi(`/api/shared/free-time?week_start=${weekStart}&user_id=${userId}`);
 
 export const magicPaste = (rawText: string): Promise<{ message: string, data: any[] }> => 
   fetchApi('/api/schedule/magic-paste', {

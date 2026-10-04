@@ -15,9 +15,11 @@ import { useCalendarData } from '../hooks/useCalendarData';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { toggleComplete } from '../lib/api';
 import { isPastDate } from '../lib/utils';
+import { useAuth } from '../contexts/AuthContext';
 
 const Dashboard = () => {
   const { blocks, kategoriList, currentWeekStart, nextWeek, prevWeek, goToToday, refetch, refetchKategori } = useCalendarData();
+  const { user } = useAuth();
   
   const [filters, setFilters] = useState({ rutin: true, dinamis: true });
   const [matkulWajibOpen, setMatkulWajibOpen] = useState(false);
@@ -119,6 +121,7 @@ const Dashboard = () => {
             onOpenMatkulWajib={() => setMatkulWajibOpen(true)}
             weekStart={currentWeekStart}
             onOpenSettings={() => setSettingsOpen(true)}
+            userId={user?.id}
           />
           <WeeklyCalendar 
             blocks={filteredBlocks}
@@ -143,6 +146,7 @@ const Dashboard = () => {
         onFilterChange={setFilters}
         kategoriList={kategoriList}
         weekStart={currentWeekStart}
+        userId={user?.id}
       />
 
       {formState.type === 'rutin' && (

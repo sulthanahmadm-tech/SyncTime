@@ -13,14 +13,15 @@ interface SidebarProps {
   onFilterChange: (filters: { rutin: boolean; dinamis: boolean }) => void;
   weekStart: string;
   onOpenSettings: () => void;
+  userId?: string;
 }
 
-export const Sidebar = ({ kategoriList, onAddRutin, onAddDinamis, onAddMagicPaste, onOpenMatkulWajib, filters, onFilterChange, weekStart, onOpenSettings }: SidebarProps) => {
+export const Sidebar = ({ kategoriList, onAddRutin, onAddDinamis, onAddMagicPaste, onOpenMatkulWajib, filters, onFilterChange, weekStart, onOpenSettings, userId }: SidebarProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = async () => {
-    const url = `${window.location.origin}/shared?week_start=${weekStart}`;
+    const url = `${window.location.origin}/shared?week_start=${weekStart}${userId ? `&user_id=${userId}` : ''}`;
     let success = false;
     if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
       try {
