@@ -18,7 +18,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
     try {
       const stored = localStorage.getItem('synctime_user');
-      return stored ? JSON.parse(stored) : null;
+      const parsed = stored ? JSON.parse(stored) : null;
+      return (parsed && parsed.id) ? parsed : null;
     } catch {
       return null;
     }
@@ -26,14 +27,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(() => {
     try {
       const stored = localStorage.getItem('synctime_user');
-      return stored ? ({ user: JSON.parse(stored) } as any) : null;
+      const parsed = stored ? JSON.parse(stored) : null;
+      return (parsed && parsed.id) ? ({ user: parsed } as any) : null;
     } catch {
       return null;
     }
   });
   const [loading, setLoading] = useState<boolean>(() => {
     try {
-      return !localStorage.getItem('synctime_user');
+      const stored = localStorage.getItem('synctime_user');
+      const parsed = stored ? JSON.parse(stored) : null;
+      return !(parsed && parsed.id);
     } catch {
       return true;
     }
@@ -45,27 +49,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session) {
         setSession(session);
         setUser(session.user);
-      } else if (!localStorage.getItem('synctime_user')) {
-        setSession(null);
-        setUser(null);
       }
       setLoading(false);
     }).catch(() => {
       setLoading(false);
     });
 
-    // Listen for changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: Session | null) => {
-      if (event === 'SIGNED_OUT') {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
+      if (_event === 'SIGNED_OUT') {
         localStorage.removeItem('synctime_user');
         setSession(null);
         setUser(null);
       } else if (session) {
         setSession(session);
         setUser(session.user);
-      } else if (!localStorage.getItem('synctime_user')) {
-        setSession(null);
-        setUser(null);
       }
       setLoading(false);
     });
