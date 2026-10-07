@@ -8,12 +8,14 @@ interface TimeBlockProps {
   block: CalendarBlock;
   onClick: () => void;
   onToggleComplete: () => void;
+  readonly?: boolean;
 }
 
-export const TimeBlock = ({ block, onClick, onToggleComplete }: TimeBlockProps) => {
+export const TimeBlock = ({ block, onClick, onToggleComplete, readonly }: TimeBlockProps) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: block.id.toString(),
-    data: block
+    data: block,
+    disabled: readonly
   });
 
   const { top, height } = getBlockPosition(block.start, block.end);
@@ -33,12 +35,12 @@ export const TimeBlock = ({ block, onClick, onToggleComplete }: TimeBlockProps) 
     <div
       ref={setNodeRef}
       style={style}
-      className={`absolute left-1 right-1 rounded-md p-1.5 shadow-sm overflow-hidden group hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing border border-black/10`}
+      className={`absolute left-1 right-1 rounded-md p-1.5 shadow-sm overflow-hidden group ${readonly ? '' : 'hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing'} border border-black/10`}
       {...attributes}
       {...listeners}
       onClick={() => {
         // Prevent click if dragging
-        if (transform) return;
+        if (transform || readonly) return;
         onClick();
       }}
     >
@@ -53,6 +55,7 @@ export const TimeBlock = ({ block, onClick, onToggleComplete }: TimeBlockProps) 
               onChange={() => onToggleComplete()}
               variant="pop"
               size="sm"
+              disabled={readonly}
             />
           </div>
         )}

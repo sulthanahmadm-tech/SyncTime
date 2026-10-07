@@ -9,14 +9,16 @@ interface WeeklyCalendarProps {
   onEmptyCellClick: (dateStr: string, hour: number) => void;
   onToggleComplete: (id: number) => void;
   currentWeekStart: string;
+  readonly?: boolean;
 }
 
-const DayColumn = ({ date, blocks, onBlockClick, onEmptyCellClick, onToggleComplete }: {
+const DayColumn = ({ date, blocks, onBlockClick, onEmptyCellClick, onToggleComplete, readonly }: {
   date: Date;
   blocks: CalendarBlock[];
   onBlockClick: (block: CalendarBlock) => void;
   onEmptyCellClick: (dateStr: string, hour: number) => void;
   onToggleComplete: (id: number) => void;
+  readonly?: boolean;
 }) => {
   const dateStr = getLocalDateString(date);
   const { setNodeRef } = useDroppable({
@@ -39,8 +41,8 @@ const DayColumn = ({ date, blocks, onBlockClick, onEmptyCellClick, onToggleCompl
         {HOURS.map(hour => (
           <div 
             key={hour} 
-            className="h-[60px] border-b border-gray-200 dark:border-gray-800/50 cursor-pointer hover:bg-gray-100 dark:bg-gray-800/30 transition"
-            onClick={() => onEmptyCellClick(dateStr, hour)}
+            className={`h-[60px] border-b border-gray-200 dark:border-gray-800/50 ${readonly ? '' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/30 transition'}`}
+            onClick={() => !readonly && onEmptyCellClick(dateStr, hour)}
           />
         ))}
         {blocks.map((block: CalendarBlock) => (
@@ -49,6 +51,7 @@ const DayColumn = ({ date, blocks, onBlockClick, onEmptyCellClick, onToggleCompl
             block={block} 
             onClick={() => onBlockClick(block)}
             onToggleComplete={() => onToggleComplete(block.id)}
+            readonly={readonly}
           />
         ))}
         {isToday && currentMinutePosition !== null && currentMinutePosition >= 0 && (
@@ -62,7 +65,7 @@ const DayColumn = ({ date, blocks, onBlockClick, onEmptyCellClick, onToggleCompl
   );
 };
 
-export const WeeklyCalendar = ({ blocks, onBlockClick, onEmptyCellClick, onToggleComplete, currentWeekStart }: WeeklyCalendarProps) => {
+export const WeeklyCalendar = ({ blocks, onBlockClick, onEmptyCellClick, onToggleComplete, currentWeekStart, readonly }: WeeklyCalendarProps) => {
   const startDate = parseLocalDate(currentWeekStart);
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(startDate);
@@ -94,6 +97,7 @@ export const WeeklyCalendar = ({ blocks, onBlockClick, onEmptyCellClick, onToggl
               onBlockClick={onBlockClick}
               onEmptyCellClick={onEmptyCellClick}
               onToggleComplete={onToggleComplete}
+              readonly={readonly}
             />
           );
         })}

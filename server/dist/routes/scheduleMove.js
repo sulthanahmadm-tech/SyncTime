@@ -4,18 +4,16 @@ const express_1 = require("express");
 const connection_1 = require("../db/connection");
 const router = (0, express_1.Router)();
 router.put('/move', async (req, res, next) => {
-    const { id, type, newDate, newStartTime, newEndTime, isTemporary } = req.body;
+    const { id, type, newDate, newStartTime, newEndTime, newStartIso, newEndIso, isTemporary } = req.body;
     if (!id || !type || !newDate || !newStartTime || !newEndTime) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
     try {
         const userId = req.user.id;
         if (type === 'dinamis') {
-            const startDateTime = `${newDate}T${newStartTime}`;
-            const endDateTime = `${newDate}T${newEndTime}`;
             const { error } = await connection_1.supabase
                 .from('kegiatan_dinamis')
-                .update({ waktu_mulai: startDateTime, waktu_selesai: endDateTime })
+                .update({ waktu_mulai: newStartIso, waktu_selesai: newEndIso })
                 .eq('id', id)
                 .eq('user_id', userId);
             if (error)
@@ -63,16 +61,14 @@ router.put('/move', async (req, res, next) => {
                 if (excError)
                     throw excError;
                 // Insert temporary dinamis
-                const startDateTime = `${newDate}T${newStartTime}`;
-                const endDateTime = `${newDate}T${newEndTime}`;
                 const { error: dinError } = await connection_1.supabase
                     .from('kegiatan_dinamis')
                     .insert({
                     user_id: userId,
                     kategori_id: rutinEvent.kategori_id,
                     judul: rutinEvent.judul,
-                    waktu_mulai: startDateTime,
-                    waktu_selesai: endDateTime
+                    waktu_mulai: newStartIso,
+                    waktu_selesai: newEndIso
                 });
                 if (dinError)
                     throw dinError;

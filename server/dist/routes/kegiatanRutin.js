@@ -80,8 +80,8 @@ router.get('/weekly', async (req, res, next) => {
                 judul: row.judul,
                 warna_hex: row.kategori.warna_hex,
                 nama_kategori: row.kategori.nama_kategori,
-                start: new Date(startDateTimeStr).toISOString(),
-                end: new Date(endDateTimeStr).toISOString(),
+                start: startDateTimeStr,
+                end: endDateTimeStr,
                 hari_mingguan: row.hari_mingguan
             });
         }

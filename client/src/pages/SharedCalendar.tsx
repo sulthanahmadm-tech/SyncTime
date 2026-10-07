@@ -55,14 +55,15 @@ export const SharedCalendar = () => {
         <h2 className="text-xl font-bold">Waktu Tersedia (Free Time)</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400">Blok abu-abu menandakan waktu sibuk. Area kosong adalah waktu yang tersedia.</p>
       </div>
-      <div className="flex-1 flex overflow-hidden pointer-events-none">
-        {/* pointer-events-none ensures it's completely read-only visually (no hover effects on blocks either) */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* We use readonly={true} below instead of pointer-events-none to prevent visual hover states, so it can still scroll. */}
         <WeeklyCalendar 
           blocks={blocks}
           currentWeekStart={weekStartParam}
           onBlockClick={() => {}}
           onEmptyCellClick={() => {}}
           onToggleComplete={() => {}}
+          readonly={true}
         />
       </div>
     </div>

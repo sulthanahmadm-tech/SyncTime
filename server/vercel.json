@@ -11,5 +11,15 @@
       "src": "/(.*)",
       "dest": "src/index.ts"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/trigger",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/daily",
+      "schedule": "0 13,23 * * *"
+    }
   ]
 }

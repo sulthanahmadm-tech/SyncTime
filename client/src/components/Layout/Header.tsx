@@ -1,3 +1,4 @@
+import { SlidersHorizontal } from 'lucide-react';
 import { parseLocalDate } from '../../lib/utils';
 import { UserProfilePopover } from './UserProfilePopover';
 
@@ -6,9 +7,10 @@ interface HeaderProps {
   onPrev: () => void;
   onNext: () => void;
   onToday: () => void;
+  onOpenFilter?: () => void;
 }
 
-export const Header = ({ currentWeekStart, onPrev, onNext, onToday }: HeaderProps) => {
+export const Header = ({ currentWeekStart, onPrev, onNext, onToday, onOpenFilter }: HeaderProps) => {
   const startDate = parseLocalDate(currentWeekStart);
   const endDate = new Date(startDate);
   endDate.setDate(endDate.getDate() + 6);
@@ -55,8 +57,17 @@ export const Header = ({ currentWeekStart, onPrev, onNext, onToday }: HeaderProp
         </button>
       </div>
 
-      {/* User Profile Popover Card */}
-      <div className="flex items-center">
+      {/* User Profile Popover Card & Filter */}
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        {onOpenFilter && (
+          <button
+            onClick={onOpenFilter}
+            aria-label="Filter dan Analisis"
+            className="md:hidden p-1.5 sm:p-2 hover:bg-gray-100 dark:bg-gray-800 active:bg-gray-200 dark:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white transition cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"
+          >
+            <SlidersHorizontal className="w-5 h-5" />
+          </button>
+        )}
         <UserProfilePopover />
       </div>
     </header>

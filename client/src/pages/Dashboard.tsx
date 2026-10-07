@@ -6,6 +6,7 @@ import { BottomNavigation } from '../components/Layout/BottomNavigation';
 import { WeeklyCalendar } from '../components/Calendar/WeeklyCalendar';
 import { DragOverlay } from '../components/Calendar/DragOverlay';
 import { ConflictModal } from '../components/Calendar/ConflictModal';
+import { FilterModal } from '../components/Calendar/FilterModal';
 import { RutinForm } from '../components/Forms/RutinForm';
 import { DinamisForm } from '../components/Forms/DinamisForm';
 import { MagicPasteBox } from '../components/Forms/MagicPasteBox';
@@ -24,6 +25,7 @@ const Dashboard = () => {
   const [filters, setFilters] = useState({ rutin: true, dinamis: true });
   const [matkulWajibOpen, setMatkulWajibOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
   
   const filteredBlocks = blocks.filter(b => {
     if (b.type === 'rutin' && !filters.rutin) return false;
@@ -91,7 +93,7 @@ const Dashboard = () => {
 
   // Prevent background scroll passthrough when any modal or form is open
   useEffect(() => {
-    const isAnyModalOpen = formState.type !== null || matkulWajibOpen || conflictModal.isOpen || settingsOpen;
+    const isAnyModalOpen = formState.type !== null || matkulWajibOpen || conflictModal.isOpen || settingsOpen || filterOpen;
     if (isAnyModalOpen) {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
@@ -99,7 +101,7 @@ const Dashboard = () => {
         document.body.style.overflow = originalOverflow;
       };
     }
-  }, [formState.type, matkulWajibOpen, conflictModal.isOpen, settingsOpen]);
+  }, [formState.type, matkulWajibOpen, conflictModal.isOpen, settingsOpen, filterOpen]);
 
   return (
     <div className="h-screen flex flex-col font-sans overflow-hidden bg-gray-50 dark:bg-gray-950">
@@ -108,6 +110,7 @@ const Dashboard = () => {
         onNext={nextWeek} 
         onPrev={prevWeek} 
         onToday={goToToday} 
+        onOpenFilter={() => setFilterOpen(true)}
       />
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="flex-1 flex overflow-hidden">
@@ -142,11 +145,18 @@ const Dashboard = () => {
         isMatkulWajibOpen={matkulWajibOpen}
         onCloseMatkulWajib={() => setMatkulWajibOpen(false)}
         onCloseForm={() => setFormState({ type: null, editData: null })}
+        onOpenSettings={() => setSettingsOpen(true)}
+        weekStart={currentWeekStart}
+        userId={user?.id}
+      />
+
+      <FilterModal
+        isOpen={filterOpen}
+        onClose={() => setFilterOpen(false)}
         filters={filters}
         onFilterChange={setFilters}
         kategoriList={kategoriList}
         weekStart={currentWeekStart}
-        userId={user?.id}
       />
 
       {formState.type === 'rutin' && (
