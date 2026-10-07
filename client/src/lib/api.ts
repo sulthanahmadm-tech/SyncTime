@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import type { CalendarBlock, ConflictDetail, Kategori, KegiatanDinamis, KegiatanRutin } from './types';
 
-export class ConflictError extends Error {
+class ConflictError extends Error {
   conflicts: ConflictDetail[];
   constructor(message: string, conflicts: ConflictDetail[]) {
     super(message);
@@ -169,5 +169,4 @@ export const completeOnboarding = (): Promise<any> =>
 // Matkul Wajib APIs
 export const getMatkulWajib = (): Promise<any[]> => fetchApi('/api/rutin/matkul-wajib');
 
-export const deleteMatkulWajib = (id: number): Promise<void> => 
-  fetchApi(`/api/rutin/${id}`, { method: 'DELETE' });
+

@@ -6,7 +6,7 @@ import { getSharedFreeTime } from '../lib/api';
 import type { CalendarBlock } from '../lib/types';
 import { getWeekStart } from '../lib/utils';
 
-export const SharedCalendar = () => {
+const SharedCalendar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const weekStartParam = searchParams.get('week_start') || getWeekStart(new Date());
   const userId = searchParams.get('user_id');

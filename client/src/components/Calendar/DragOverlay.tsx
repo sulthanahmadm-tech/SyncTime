@@ -5,7 +5,9 @@ import { getBlockPosition, formatTime } from '../../lib/utils';
 export const DragOverlay = ({ activeBlock }: { activeBlock: CalendarBlock | null }) => {
   if (!activeBlock) return null;
 
-  const { height } = getBlockPosition(activeBlock.start, activeBlock.end);
+  const { height, isHidden } = getBlockPosition(activeBlock.start, activeBlock.end);
+
+  if (isHidden) return null;
 
   return (
     <DndDragOverlay>

@@ -18,7 +18,9 @@ export const TimeBlock = ({ block, onClick, onToggleComplete, readonly }: TimeBl
     disabled: readonly
   });
 
-  const { top, height } = getBlockPosition(block.start, block.end);
+  const { top, height, isHidden } = getBlockPosition(block.start, block.end);
+
+  if (isHidden) return null;
 
   const style = {
     top: `${top}px`,
