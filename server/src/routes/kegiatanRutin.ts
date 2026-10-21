@@ -96,15 +96,18 @@ router.post('/', async (req: AuthenticatedRequest, res, next) => {
   const { force } = req.query;
   try {
     const userId = req.user!.id;
-    const now = new Date();
-    let currentDay = now.getDay();
+    const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
+    const nowWib = new Date(Date.now() + WIB_OFFSET_MS);
+    let currentDay = nowWib.getUTCDay();
     if (currentDay === 0) currentDay = 7;
-    const diff = hari_mingguan - currentDay;
-    const checkDate = new Date(now);
-    checkDate.setDate(checkDate.getDate() + diff);
+    const diff = Number(hari_mingguan) - currentDay;
+    const checkDate = new Date(nowWib);
+    checkDate.setUTCDate(checkDate.getUTCDate() + diff);
     const dateStr = checkDate.toISOString().split('T')[0];
-    const startDate = new Date(`${dateStr}T${jam_mulai}`);
-    const endDate = new Date(`${dateStr}T${jam_selesai}`);
+    const normStart = String(jam_mulai).length === 5 ? `${jam_mulai}:00` : String(jam_mulai);
+    const normEnd = String(jam_selesai).length === 5 ? `${jam_selesai}:00` : String(jam_selesai);
+    const startDate = new Date(`${dateStr}T${normStart}+07:00`);
+    const endDate = new Date(`${dateStr}T${normEnd}+07:00`);
 
     const check = await checkConflicts(userId, { start: startDate, end: endDate });
     if (check.hasConflict && force !== 'true') {
@@ -138,15 +141,18 @@ router.put('/:id', async (req: AuthenticatedRequest, res, next) => {
   const { force } = req.query;
   try {
     const userId = req.user!.id;
-    const now = new Date();
-    let currentDay = now.getDay();
+    const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
+    const nowWib = new Date(Date.now() + WIB_OFFSET_MS);
+    let currentDay = nowWib.getUTCDay();
     if (currentDay === 0) currentDay = 7;
-    const diff = hari_mingguan - currentDay;
-    const checkDate = new Date(now);
-    checkDate.setDate(checkDate.getDate() + diff);
+    const diff = Number(hari_mingguan) - currentDay;
+    const checkDate = new Date(nowWib);
+    checkDate.setUTCDate(checkDate.getUTCDate() + diff);
     const dateStr = checkDate.toISOString().split('T')[0];
-    const startDate = new Date(`${dateStr}T${jam_mulai}`);
-    const endDate = new Date(`${dateStr}T${jam_selesai}`);
+    const normStart = String(jam_mulai).length === 5 ? `${jam_mulai}:00` : String(jam_mulai);
+    const normEnd = String(jam_selesai).length === 5 ? `${jam_selesai}:00` : String(jam_selesai);
+    const startDate = new Date(`${dateStr}T${normStart}+07:00`);
+    const endDate = new Date(`${dateStr}T${normEnd}+07:00`);
 
     const check = await checkConflicts(userId, { start: startDate, end: endDate, excludeId: Number(id), excludeType: 'rutin' });
     if (check.hasConflict && force !== 'true') {

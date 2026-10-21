@@ -32,11 +32,16 @@ export async function checkConflicts(
     });
   }
 
-  // Query kegiatan_rutin for conflicts
-  let dayOfWeek = start.getDay();
+  // Query kegiatan_rutin for conflicts (jam_mulai & hari_mingguan are stored in WIB / GMT+7)
+  const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
+  const startWib = new Date(start.getTime() + WIB_OFFSET_MS);
+  const endWib = new Date(end.getTime() + WIB_OFFSET_MS);
+
+  let dayOfWeek = startWib.getUTCDay();
   if (dayOfWeek === 0) dayOfWeek = 7;
-  const startTimeStr = start.toTimeString().split(' ')[0];
-  const endTimeStr = end.toTimeString().split(' ')[0];
+  const startTimeStr = startWib.toISOString().split('T')[1].substring(0, 8);
+  const endTimeStr = endWib.toISOString().split('T')[1].substring(0, 8);
+  const wibDateStr = startWib.toISOString().split('T')[0];
 
   let rutinQuery = supabase
     .from('kegiatan_rutin')
@@ -53,8 +58,8 @@ export async function checkConflicts(
   const { data: rutinRes } = await rutinQuery;
 
   for (const row of (rutinRes || [])) {
-    const startStr = start.toISOString().split('T')[0] + 'T' + row.jam_mulai;
-    const endStr = start.toISOString().split('T')[0] + 'T' + row.jam_selesai;
+    const startStr = `${wibDateStr}T${row.jam_mulai}`;
+    const endStr = `${wibDateStr}T${row.jam_selesai}`;
     conflicts.push({
       conflicting_id: row.id,
       conflicting_judul: row.judul,

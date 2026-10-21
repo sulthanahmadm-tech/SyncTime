@@ -2,14 +2,25 @@ import cron from 'node-cron';
 import { supabase } from '../db/connection';
 import { sendEmailNotification } from './emailNotifier';
 
+const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
+
 export const checkAndSendReminders = async () => {
   try {
     const now = new Date();
     const targetTime = new Date(now.getTime() + 20 * 60000); // 20 minutes ahead
+    const targetWib = new Date(targetTime.getTime() + WIB_OFFSET_MS);
 
-    let dayOfWeek = targetTime.getDay();
+    let dayOfWeek = targetWib.getUTCDay();
     if (dayOfWeek === 0) dayOfWeek = 7;
-    const targetTimeStr = targetTime.toTimeString().substring(0, 5) + ':00';
+
+    const targetYear = targetWib.getUTCFullYear();
+    const targetMonth = String(targetWib.getUTCMonth() + 1).padStart(2, '0');
+    const targetDate = String(targetWib.getUTCDate()).padStart(2, '0');
+    const targetDateStr = `${targetYear}-${targetMonth}-${targetDate}`;
+
+    const targetHours = String(targetWib.getUTCHours()).padStart(2, '0');
+    const targetMinutes = String(targetWib.getUTCMinutes()).padStart(2, '0');
+    const targetTimeStr = `${targetHours}:${targetMinutes}:00`;
 
     // Get all users with email
     const { data: users, error: usersError } = await supabase
@@ -33,9 +44,20 @@ export const checkAndSendReminders = async () => {
         .eq('hari_mingguan', dayOfWeek)
         .eq('jam_mulai', targetTimeStr);
 
-      for (const r of (rutinRes || [])) {
-        const subject = `⏰ Pengingat: ${r.judul} dimulai 20 menit lagi`;
-        const html = `
+      if (rutinRes && rutinRes.length > 0) {
+        const { data: exceptionsRes } = await supabase
+          .from('rutin_exceptions')
+          .select('kegiatan_rutin_id')
+          .in('kegiatan_rutin_id', rutinRes.map(r => r.id))
+          .eq('tanggal_dilewati', targetDateStr);
+
+        const skippedRutinIds = new Set((exceptionsRes || []).map(e => e.kegiatan_rutin_id));
+
+        for (const r of rutinRes) {
+          if (skippedRutinIds.has(r.id)) continue;
+
+          const subject = `⏰ Pengingat: ${r.judul} dimulai 20 menit lagi`;
+          const html = `
           <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; background: #1a1a2e; color: #e0e0e0; border-radius: 12px;">
             <h2 style="color: #818cf8; margin-top: 0;">🔔 Pengingat Jadwal Rutin</h2>
             <div style="background: #16213e; padding: 16px; border-radius: 8px; border-left: 4px solid #818cf8;">
@@ -47,12 +69,13 @@ export const checkAndSendReminders = async () => {
             <p style="margin-top: 16px; font-size: 13px; color: #6b7280;">Dikirim otomatis oleh SyncTime</p>
           </div>
         `;
-        await sendEmailNotification(user.email, subject, html);
+          await sendEmailNotification(user.email, subject, html);
+        }
       }
 
       // Check Dinamis for this user
       const targetTimeStart = new Date(targetTime);
-      targetTimeStart.setSeconds(0, 0);
+      targetTimeStart.setUTCSeconds(0, 0);
       const targetTimeEnd = new Date(targetTimeStart.getTime() + 60000);
 
       const { data: dinamisRes } = await supabase
@@ -64,7 +87,8 @@ export const checkAndSendReminders = async () => {
         .eq('is_completed', false);
 
       for (const d of (dinamisRes || [])) {
-        const timeStr = new Date(d.waktu_mulai).toTimeString().substring(0, 5);
+        const dinamisWib = new Date(new Date(d.waktu_mulai).getTime() + WIB_OFFSET_MS);
+        const timeStr = `${String(dinamisWib.getUTCHours()).padStart(2, '0')}:${String(dinamisWib.getUTCMinutes()).padStart(2, '0')}`;
         const subject = `⏰ Pengingat: ${d.judul} dimulai 20 menit lagi`;
         const html = `
           <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; background: #1a1a2e; color: #e0e0e0; border-radius: 12px;">
@@ -89,17 +113,15 @@ export const checkAndSendReminders = async () => {
 export const checkAndSendDailySchedule = async () => {
   try {
     const now = new Date();
-    const gmt7Time = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    const gmt7Time = new Date(now.getTime() + WIB_OFFSET_MS);
     const gmt7Hour = gmt7Time.getUTCHours();
 
-    let isTomorrow = false;
     let labelHari = 'Hari Ini';
 
     // If it's afternoon/evening in GMT+7 (e.g., 20:00), prepare schedule for tomorrow.
     // If it's morning (e.g., 06:00), prepare schedule for today.
     if (gmt7Hour >= 12) {
       gmt7Time.setUTCDate(gmt7Time.getUTCDate() + 1);
-      isTomorrow = true;
       labelHari = 'Besok';
     }
 
@@ -114,6 +136,7 @@ export const checkAndSendDailySchedule = async () => {
     const targetEndUTC = new Date(Date.UTC(targetYear, targetMonth, targetDate, 16, 59, 59, 999));
 
     const dateStr = `${String(targetDate).padStart(2, '0')}/${String(targetMonth + 1).padStart(2, '0')}/${targetYear}`;
+    const isoDateStr = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(targetDate).padStart(2, '0')}`;
 
     // Get all users with email
     const { data: users, error: usersError } = await supabase
@@ -135,6 +158,16 @@ export const checkAndSendDailySchedule = async () => {
         .eq('user_id', user.id)
         .eq('hari_mingguan', dayOfWeek);
 
+      let skippedRutinIds = new Set<number>();
+      if (rutinRes && rutinRes.length > 0) {
+        const { data: exceptionsRes } = await supabase
+          .from('rutin_exceptions')
+          .select('kegiatan_rutin_id')
+          .in('kegiatan_rutin_id', rutinRes.map(r => r.id))
+          .eq('tanggal_dilewati', isoDateStr);
+        skippedRutinIds = new Set((exceptionsRes || []).map(e => e.kegiatan_rutin_id));
+      }
+
       const { data: dinamisRes } = await supabase
         .from('kegiatan_dinamis')
         .select('*, kategori!inner(nama_kategori)')
@@ -145,6 +178,7 @@ export const checkAndSendDailySchedule = async () => {
       const scheduleItems: Array<{ judul: string, kategori: string, waktu: string, tipe: string }> = [];
 
       (rutinRes || []).forEach(r => {
+        if (skippedRutinIds.has(r.id)) return;
         scheduleItems.push({
           judul: r.judul,
           kategori: r.kategori?.nama_kategori || '-',
@@ -155,7 +189,7 @@ export const checkAndSendDailySchedule = async () => {
 
       (dinamisRes || []).forEach(d => {
         const dateObj = new Date(d.waktu_mulai);
-        const gmt7Dinamis = new Date(dateObj.getTime() + 7 * 3600 * 1000);
+        const gmt7Dinamis = new Date(dateObj.getTime() + WIB_OFFSET_MS);
         const h = String(gmt7Dinamis.getUTCHours()).padStart(2, '0');
         const m = String(gmt7Dinamis.getUTCMinutes()).padStart(2, '0');
         scheduleItems.push({
