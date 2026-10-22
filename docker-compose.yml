@@ -7,13 +7,12 @@ services:
     restart: unless-stopped
     ports:
       - "3001:3001"
-    volumes:
-      - synctime_data:/app/server/db_data
     environment:
       - NODE_ENV=production
       - PORT=3001
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
       - RESEND_API_KEY=${RESEND_API_KEY}
       - EMAIL_FROM=${EMAIL_FROM}
-
-volumes:
-  synctime_data:
+      - CRON_SECRET=${CRON_SECRET}

@@ -25,6 +25,11 @@ router.get('/free-time', async (req, res, next) => {
             .gte('tanggal_dilewati', startDateStr)
             .lt('tanggal_dilewati', endDateStr);
         const exceptionSet = new Set((exceptions || []).map((e) => `${e.kegiatan_rutin_id}-${e.tanggal_dilewati}`));
+        const { data: profile } = await connection_1.supabase
+            .from('profiles')
+            .select('semester_start, semester_end')
+            .eq('id', user_id)
+            .single();
         // Get rutin
         const { data: rutinRes } = await connection_1.supabase
             .from('kegiatan_rutin')
@@ -38,6 +43,14 @@ router.get('/free-time', async (req, res, next) => {
             const dateStr = eventDate.toISOString().split('T')[0];
             if (exceptionSet.has(`${row.id}-${dateStr}`))
                 continue;
+            if (profile?.semester_start && profile?.semester_end) {
+                if (dateStr < profile.semester_start || dateStr > profile.semester_end)
+                    continue;
+                const semStart = new Date(profile.semester_start);
+                const weekNum = Math.floor((new Date(dateStr).getTime() - semStart.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+                if (weekNum > (row.batas_minggu_berulang || 16))
+                    continue;
+            }
             const startDateTimeStr = `${dateStr}T${row.jam_mulai}`;
             const endDateTimeStr = `${dateStr}T${row.jam_selesai}`;
             blocks.push({

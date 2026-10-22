@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 import { setSemester, addMatkulBulk, completeOnboarding } from '../lib/api';
 
@@ -22,7 +23,7 @@ interface MatkulItem {
 
 const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
-  
+  const { refreshProfile } = useAuth();
   
   const [step, setStep] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
@@ -46,6 +47,7 @@ const OnboardingPage: React.FC = () => {
     try {
       setLoading(true);
       await completeOnboarding();
+      await refreshProfile();
       navigate('/dashboard');
     } catch (err) {
       console.error(err);
@@ -58,6 +60,10 @@ const OnboardingPage: React.FC = () => {
     e.preventDefault();
     if (!semesterStart || !semesterEnd) {
       setError('Harap isi kedua tanggal');
+      return;
+    }
+    if (semesterEnd <= semesterStart) {
+      setError('Tanggal selesai semester harus lebih akhir dari tanggal mulai');
       return;
     }
     try {
@@ -77,6 +83,10 @@ const OnboardingPage: React.FC = () => {
     e.preventDefault();
     if (!newMatkul.judul || !newMatkul.jam_mulai || !newMatkul.jam_selesai) {
       setError('Harap isi nama matkul dan jam');
+      return;
+    }
+    if (newMatkul.jam_selesai <= newMatkul.jam_mulai) {
+      setError('Jam selesai harus lebih akhir dari jam mulai');
       return;
     }
     
@@ -129,6 +139,7 @@ const OnboardingPage: React.FC = () => {
       setLoading(true);
       setError(null);
       await completeOnboarding();
+      await refreshProfile();
       navigate('/dashboard');
     } catch (err) {
       console.error(err);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Kategori, KegiatanRutin } from '../../lib/types';
-import { createRutin, updateRutin, createKategori } from '../../lib/api';
+import { createRutin, updateRutin, createKategori, deleteKegiatanRutin } from '../../lib/api';
 
 interface RutinFormProps {
   isOpen: boolean;
@@ -30,13 +30,24 @@ export const RutinForm = ({ isOpen, onClose, onSaved, kategoriList, onKategoriAd
   useEffect(() => {
     if (isOpen) {
       if (editData) {
+        const rawJamMulai = (editData as any).jam_mulai
+          ? (editData as any).jam_mulai
+          : (editData as any).start
+            ? ((editData as any).start.includes('T') ? (editData as any).start.split('T')[1] : (editData as any).start)
+            : '08:00';
+        const rawJamSelesai = (editData as any).jam_selesai
+          ? (editData as any).jam_selesai
+          : (editData as any).end
+            ? ((editData as any).end.includes('T') ? (editData as any).end.split('T')[1] : (editData as any).end)
+            : '09:00';
+
         setFormData({
-          judul: editData.judul,
-          kategori_id: editData.kategori_id.toString(),
-          hari_mingguan: editData.hari_mingguan,
-          jam_mulai: editData.jam_mulai.substring(0, 5),
-          jam_selesai: editData.jam_selesai.substring(0, 5),
-          batas_minggu_berulang: editData.batas_minggu_berulang
+          judul: editData.judul || '',
+          kategori_id: (editData.kategori_id || '').toString(),
+          hari_mingguan: (editData as any).hari_mingguan || 1,
+          jam_mulai: rawJamMulai.substring(0, 5),
+          jam_selesai: rawJamSelesai.substring(0, 5),
+          batas_minggu_berulang: (editData as any).batas_minggu_berulang || 16
         });
       } else {
         setFormData({
@@ -44,7 +55,9 @@ export const RutinForm = ({ isOpen, onClose, onSaved, kategoriList, onKategoriAd
           kategori_id: kategoriList[0]?.id.toString() || '',
           hari_mingguan: defaultDay || 1,
           jam_mulai: defaultTime || '08:00',
-          jam_selesai: defaultTime ? `${parseInt(defaultTime.split(':')[0]) + 1}:00`.padStart(5, '0') : '09:00',
+          jam_selesai: defaultTime 
+            ? (parseInt(defaultTime.split(':')[0]) >= 23 ? '23:59' : `${parseInt(defaultTime.split(':')[0]) + 1}:00`.padStart(5, '0'))
+            : '09:00',
           batas_minggu_berulang: 16
         });
       }
@@ -98,6 +111,10 @@ export const RutinForm = ({ isOpen, onClose, onSaved, kategoriList, onKategoriAd
       alert('Pilih kategori terlebih dahulu');
       return;
     }
+    if (formData.jam_selesai <= formData.jam_mulai) {
+      alert('Jam selesai harus lebih akhir dari jam mulai');
+      return;
+    }
     const payload = {
       judul: formData.judul,
       kategori_id: parseInt(formData.kategori_id),
@@ -121,6 +138,19 @@ export const RutinForm = ({ isOpen, onClose, onSaved, kategoriList, onKategoriAd
       } else {
         console.error(error);
         alert(error.message);
+      }
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!editData) return;
+    if (window.confirm('Apakah Anda yakin ingin menghapus jadwal ini?')) {
+      try {
+        await deleteKegiatanRutin(editData.id);
+        onSaved();
+        onClose();
+      } catch (err: any) {
+        alert('Gagal menghapus jadwal: ' + err.message);
       }
     }
   };
@@ -152,7 +182,7 @@ export const RutinForm = ({ isOpen, onClose, onSaved, kategoriList, onKategoriAd
               <div className="flex gap-2">
                 <input required autoFocus type="text" placeholder="Nama Kategori" value={newKategori.nama} onChange={e => setNewKategori({...newKategori, nama: e.target.value})} className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 outline-none" />
                 <input type="color" value={newKategori.warna} onChange={e => setNewKategori({...newKategori, warna: e.target.value})} className="w-10 h-10 rounded cursor-pointer border-0 bg-transparent p-0" title="Warna Kategori" />
-                <button type="button" onClick={handleCreateKategori} className="bg-emerald-600 dark:bg-indigo-600 px-3 min-h-[44px] rounded-lg text-sm hover:bg-emerald-700 dark:bg-indigo-700 transition font-medium cursor-pointer">Simpan</button>
+                <button type="button" onClick={handleCreateKategori} className="bg-emerald-600 dark:bg-indigo-600 px-3 min-h-[44px] rounded-lg text-sm hover:bg-emerald-700 dark:bg-indigo-700 transition font-medium cursor-pointer text-white">Simpan</button>
                 <button type="button" onClick={() => setIsAddingKategori(false)} className="bg-gray-200 dark:bg-gray-700 px-3 min-h-[44px] rounded-lg text-sm hover:bg-gray-600 transition font-medium cursor-pointer">Batal</button>
               </div>
             )}
@@ -177,9 +207,20 @@ export const RutinForm = ({ isOpen, onClose, onSaved, kategoriList, onKategoriAd
             <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Batas Minggu Berulang</label>
             <input required type="number" min="1" value={formData.batas_minggu_berulang} onChange={e => setFormData({...formData, batas_minggu_berulang: parseInt(e.target.value)})} className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 outline-none" />
           </div>
-          <div className="flex justify-end gap-3 mt-4">
-            <button type="button" onClick={onClose} className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:bg-gray-700 active:bg-gray-600 text-gray-900 dark:text-white transition cursor-pointer flex items-center justify-center">Batal</button>
-            <button type="submit" className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 active:bg-indigo-800 text-gray-900 dark:text-white transition cursor-pointer flex items-center justify-center">Simpan</button>
+          <div className="flex justify-between items-center gap-3 mt-4">
+            {editData ? (
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 active:bg-red-800 text-white transition cursor-pointer flex items-center justify-center"
+              >
+                Hapus
+              </button>
+            ) : <div />}
+            <div className="flex gap-3">
+              <button type="button" onClick={onClose} className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:bg-gray-700 active:bg-gray-600 text-gray-900 dark:text-white transition cursor-pointer flex items-center justify-center">Batal</button>
+              <button type="submit" className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 active:bg-indigo-800 text-white transition cursor-pointer flex items-center justify-center">Simpan</button>
+            </div>
           </div>
         </form>
       </div>

@@ -63,7 +63,7 @@ export const ConflictModal = ({ isOpen, conflicts, onCancel, onForceSave }: Conf
             </button>
             <button 
               onClick={onForceSave}
-              className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 active:bg-red-800 text-gray-900 dark:text-white transition cursor-pointer flex items-center justify-center"
+              className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 active:bg-red-800 text-white transition cursor-pointer flex items-center justify-center"
             >
               Force Save
             </button>

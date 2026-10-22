@@ -29,12 +29,8 @@ COPY --from=builder /app/client/dist ./client/dist
 WORKDIR /app/server
 RUN npm install --omit=dev
 
-# SQLite database will be stored in this directory, map this to a volume
-VOLUME ["/app/server/db_data"]
-
 EXPOSE 3001
 ENV NODE_ENV=production
 ENV PORT=3001
-ENV DATABASE_PATH=/app/server/db_data/synctime.db
 
 CMD ["npm", "start"]

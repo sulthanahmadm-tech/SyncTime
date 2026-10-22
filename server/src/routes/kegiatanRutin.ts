@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { supabase } from '../db/connection';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { checkConflicts } from '../utils/conflictChecker';
-import { CalendarBlock } from '../types';
 
 const router = Router();
 
@@ -50,46 +49,6 @@ router.get('/matkul-wajib', async (req: AuthenticatedRequest, res, next) => {
   }
 });
 
-router.get('/weekly', async (req: AuthenticatedRequest, res, next) => {
-  const { week_start } = req.query;
-  if (!week_start || typeof week_start !== 'string') {
-    return res.status(400).json({ error: 'week_start query param is required (YYYY-MM-DD)' });
-  }
-  try {
-    const userId = req.user!.id;
-    const start = new Date(week_start);
-    const { data, error } = await supabase
-      .from('kegiatan_rutin')
-      .select('*, kategori!inner(warna_hex, nama_kategori)')
-      .eq('user_id', userId);
-    if (error) throw error;
-
-    const blocks: CalendarBlock[] = [];
-    for (const row of (data || [])) {
-      const dayOffset = row.hari_mingguan - 1;
-      const eventDate = new Date(start);
-      eventDate.setDate(eventDate.getDate() + dayOffset);
-      const dateStr = eventDate.toISOString().split('T')[0];
-      // jam_mulai and jam_selesai are TIME type from PostgreSQL, returned as 'HH:MM:SS'
-      const startDateTimeStr = `${dateStr}T${row.jam_mulai}`;
-      const endDateTimeStr = `${dateStr}T${row.jam_selesai}`;
-      blocks.push({
-        id: row.id,
-        type: 'rutin',
-        kategori_id: row.kategori_id,
-        judul: row.judul,
-        warna_hex: row.kategori.warna_hex,
-        nama_kategori: row.kategori.nama_kategori,
-        start: startDateTimeStr,
-        end: endDateTimeStr,
-        hari_mingguan: row.hari_mingguan
-      });
-    }
-    res.json(blocks);
-  } catch (err) {
-    next(err);
-  }
-});
 
 router.post('/', async (req: AuthenticatedRequest, res, next) => {
   const { kategori_id, judul, hari_mingguan, jam_mulai, jam_selesai, batas_minggu_berulang, is_matkul_wajib } = req.body;
@@ -106,6 +65,11 @@ router.post('/', async (req: AuthenticatedRequest, res, next) => {
     const dateStr = checkDate.toISOString().split('T')[0];
     const normStart = String(jam_mulai).length === 5 ? `${jam_mulai}:00` : String(jam_mulai);
     const normEnd = String(jam_selesai).length === 5 ? `${jam_selesai}:00` : String(jam_selesai);
+
+    if (normEnd <= normStart) {
+      return res.status(400).json({ error: 'jam_selesai must be greater than jam_mulai' });
+    }
+
     const startDate = new Date(`${dateStr}T${normStart}+07:00`);
     const endDate = new Date(`${dateStr}T${normEnd}+07:00`);
 
@@ -151,6 +115,11 @@ router.put('/:id', async (req: AuthenticatedRequest, res, next) => {
     const dateStr = checkDate.toISOString().split('T')[0];
     const normStart = String(jam_mulai).length === 5 ? `${jam_mulai}:00` : String(jam_mulai);
     const normEnd = String(jam_selesai).length === 5 ? `${jam_selesai}:00` : String(jam_selesai);
+
+    if (normEnd <= normStart) {
+      return res.status(400).json({ error: 'jam_selesai must be greater than jam_mulai' });
+    }
+
     const startDate = new Date(`${dateStr}T${normStart}+07:00`);
     const endDate = new Date(`${dateStr}T${normEnd}+07:00`);
 

@@ -13,7 +13,7 @@ interface TimeBlockProps {
 
 export const TimeBlock = ({ block, onClick, onToggleComplete, readonly }: TimeBlockProps) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: block.id.toString(),
+    id: `${block.type}-${block.id}`,
     data: block,
     disabled: readonly
   });

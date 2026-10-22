@@ -55,7 +55,7 @@ export const Sidebar = ({ kategoriList, onAddRutin, onAddDinamis, onAddMagicPast
       <div className="relative">
         <button 
           onClick={() => setMenuOpen(!menuOpen)}
-          className="w-full bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 text-gray-900 dark:text-white py-2 rounded-lg font-medium transition flex justify-center items-center gap-2"
+          className="w-full bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 text-white py-2 rounded-lg font-medium transition flex justify-center items-center gap-2"
         >
           + Jadwal Baru
         </button>
@@ -71,7 +71,7 @@ export const Sidebar = ({ kategoriList, onAddRutin, onAddDinamis, onAddMagicPast
 
       <button 
         onClick={onOpenMatkulWajib}
-        className="w-full bg-amber-600 hover:bg-amber-700 text-gray-900 dark:text-white py-2 rounded-lg text-sm font-medium transition"
+        className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2 rounded-lg text-sm font-medium transition"
       >
         📚 Matkul Wajib
       </button>
@@ -80,7 +80,7 @@ export const Sidebar = ({ kategoriList, onAddRutin, onAddDinamis, onAddMagicPast
         onClick={handleCopyLink}
         className={`w-full border text-sm font-medium py-2 rounded-lg transition ${
           copied 
-            ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-400' 
+            ? 'bg-emerald-100 border-emerald-500 text-emerald-800 dark:bg-emerald-950/60 dark:border-emerald-500/40 dark:text-emerald-400' 
             : 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 hover:bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'
         }`}
       >

@@ -2,15 +2,25 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const connection_1 = require("../db/connection");
+const conflictChecker_1 = require("../utils/conflictChecker");
 const router = (0, express_1.Router)();
 router.put('/move', async (req, res, next) => {
     const { id, type, newDate, newStartTime, newEndTime, newStartIso, newEndIso, isTemporary } = req.body;
+    const force = req.query.force || req.body.force;
     if (!id || !type || !newDate || !newStartTime || !newEndTime) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
     try {
         const userId = req.user.id;
         if (type === 'dinamis') {
+            const start = new Date(newStartIso);
+            const end = new Date(newEndIso);
+            if (force !== 'true' && force !== true) {
+                const check = await (0, conflictChecker_1.checkConflicts)(userId, { start, end, excludeId: Number(id), excludeType: 'dinamis' });
+                if (check.hasConflict) {
+                    return res.status(409).json(check);
+                }
+            }
             const { error } = await connection_1.supabase
                 .from('kegiatan_dinamis')
                 .update({ waktu_mulai: newStartIso, waktu_selesai: newEndIso })
@@ -23,12 +33,19 @@ router.put('/move', async (req, res, next) => {
         if (type === 'rutin') {
             if (!isTemporary) {
                 // Permanent move
-                const dateObj = new Date(newDate);
-                let hariMingguan = dateObj.getDay();
-                if (hariMingguan === 0)
-                    hariMingguan = 7;
+                const [y, m, d] = newDate.split('-').map(Number);
+                const dateObj = new Date(y, m - 1, d);
+                let hariMingguan = dateObj.getDay() === 0 ? 7 : dateObj.getDay();
                 const jamMulai = newStartTime.includes('T') ? newStartTime.split('T')[1].substring(0, 8) : newStartTime.substring(0, 8);
                 const jamSelesai = newEndTime.includes('T') ? newEndTime.split('T')[1].substring(0, 8) : newEndTime.substring(0, 8);
+                const start = new Date(newStartIso || `${newDate}T${jamMulai}`);
+                const end = new Date(newEndIso || `${newDate}T${jamSelesai}`);
+                if (force !== 'true' && force !== true) {
+                    const check = await (0, conflictChecker_1.checkConflicts)(userId, { start, end, excludeId: Number(id), excludeType: 'rutin' });
+                    if (check.hasConflict) {
+                        return res.status(409).json(check);
+                    }
+                }
                 const { error } = await connection_1.supabase
                     .from('kegiatan_rutin')
                     .update({ hari_mingguan: hariMingguan, jam_mulai: jamMulai, jam_selesai: jamSelesai })
@@ -43,6 +60,14 @@ router.put('/move', async (req, res, next) => {
                 const { originalDate } = req.body;
                 if (!originalDate) {
                     return res.status(400).json({ error: 'originalDate is required for temporary move' });
+                }
+                const start = new Date(newStartIso);
+                const end = new Date(newEndIso);
+                if (force !== 'true' && force !== true) {
+                    const check = await (0, conflictChecker_1.checkConflicts)(userId, { start, end });
+                    if (check.hasConflict) {
+                        return res.status(409).json(check);
+                    }
                 }
                 // Get the original rutin event
                 const { data: rutinEvent, error: fetchError } = await connection_1.supabase

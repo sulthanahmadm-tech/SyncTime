@@ -79,7 +79,7 @@ router.delete('/:id', async (req: AuthenticatedRequest, res, next) => {
   const { id } = req.params;
   try {
     const userId = req.user!.id;
-    const { error, count } = await supabase
+    const { error } = await supabase
       .from('kategori')
       .delete()
       .eq('id', Number(id))

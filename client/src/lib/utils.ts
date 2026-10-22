@@ -28,7 +28,7 @@ export const formatTime = (isoString: string): string => {
 
 
 
-export const HOURS = Array.from({ length: 18 }, (_, i) => i + 6); // 6 to 23
+export const HOURS = Array.from({ length: 24 }, (_, i) => i); // 0 to 23
 
 export const DAY_NAMES = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
@@ -56,10 +56,10 @@ export const getBlockPosition = (start: string, end: string) => {
     durationMinutes = 60; // fallback
   }
   
-  let top = (startHour - 6) * 60 + startMinute;
+  let top = startHour * 60 + startMinute;
   let height = durationMinutes;
   
-  const MAX_HEIGHT = 18 * 60; // 6:00 to 24:00 is 18 hours
+  const MAX_HEIGHT = 24 * 60; // 0:00 to 24:00 is 24 hours
   
   if (top < 0) {
     height += top;

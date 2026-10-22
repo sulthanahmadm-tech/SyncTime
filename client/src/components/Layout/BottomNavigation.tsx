@@ -257,7 +257,7 @@ export const BottomNavigation = ({
             }}
             data-testid="bottom-nav-jadwal"
             className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 cursor-pointer ${
-              isScheduleActive ? 'text-emerald-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-200'
+              isScheduleActive ? 'text-emerald-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
             }`}
             aria-label="Jadwal Kalender"
             aria-pressed={isScheduleActive}
@@ -273,7 +273,7 @@ export const BottomNavigation = ({
             }}
             data-testid="bottom-nav-tambah"
             className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 cursor-pointer ${
-              actionSheetOpen ? 'text-emerald-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-200'
+              actionSheetOpen ? 'text-emerald-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
             }`}
             aria-label="Tambah Jadwal"
             aria-expanded={actionSheetOpen}
@@ -310,7 +310,7 @@ export const BottomNavigation = ({
               onOpenSettings();
             }}
             data-testid="bottom-nav-settings"
-            className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 text-gray-500 dark:text-gray-400 hover:text-gray-200 cursor-pointer"
+            className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer"
             aria-label="Pengaturan"
           >
             <Settings className="w-5 h-5" />

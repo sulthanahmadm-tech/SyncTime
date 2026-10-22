@@ -67,7 +67,7 @@ export const UserProfilePopover = () => {
         {/* Avatar */}
         <div 
           data-testid="user-avatar"
-          className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 via-indigo-600 to-purple-600 text-gray-900 dark:text-white flex items-center justify-center font-bold text-xs shadow-md ring-1 ring-white/20 shrink-0 overflow-hidden"
+          className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 via-indigo-600 to-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-md ring-1 ring-white/20 shrink-0 overflow-hidden"
         >
           {avatarUrl ? (
             <img 
@@ -84,7 +84,7 @@ export const UserProfilePopover = () => {
         {/* Email / Display Name */}
         <span 
           data-testid="user-email"
-          className="hidden sm:inline-block text-sm text-gray-200 font-medium max-w-[140px] md:max-w-[180px] truncate" 
+          className="hidden sm:inline-block text-sm text-gray-700 dark:text-gray-200 font-medium max-w-[140px] md:max-w-[180px] truncate" 
           title={displayName}
         >
           {displayName}

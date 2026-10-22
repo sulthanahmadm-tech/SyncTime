@@ -20,6 +20,12 @@ router.get('/weekly', async (req: AuthenticatedRequest, res, next) => {
     const startDateStr = start.toISOString().split('T')[0];
     const endDateStr = end.toISOString().split('T')[0];
 
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('semester_start, semester_end')
+      .eq('id', userId)
+      .single();
+
     const { data: rutinRes, error: rutinError } = await supabase
       .from('kegiatan_rutin')
       .select('*, kategori!inner(warna_hex, nama_kategori)')
@@ -50,6 +56,18 @@ router.get('/weekly', async (req: AuthenticatedRequest, res, next) => {
       // Skip if there's an exception for this date
       if (exceptionSet.has(`${row.id}-${dateStr}`)) {
         continue;
+      }
+
+      // Check semester bounds and batas_minggu_berulang
+      if (profile?.semester_start && profile?.semester_end) {
+        if (dateStr < profile.semester_start || dateStr > profile.semester_end) {
+          continue;
+        }
+        const semStart = new Date(profile.semester_start);
+        const weekNum = Math.floor((new Date(dateStr).getTime() - semStart.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+        if (weekNum > (row.batas_minggu_berulang || 16)) {
+          continue;
+        }
       }
 
       const startDateTimeStr = `${dateStr}T${row.jam_mulai}`;

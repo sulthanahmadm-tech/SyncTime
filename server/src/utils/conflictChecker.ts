@@ -43,6 +43,19 @@ export async function checkConflicts(
   const endTimeStr = endWib.toISOString().split('T')[1].substring(0, 8);
   const wibDateStr = startWib.toISOString().split('T')[0];
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('semester_start, semester_end')
+    .eq('id', userId)
+    .single();
+
+  const { data: exceptionsRes } = await supabase
+    .from('rutin_exceptions')
+    .select('kegiatan_rutin_id')
+    .eq('tanggal_dilewati', wibDateStr);
+
+  const exceptionIds = new Set((exceptionsRes || []).map((e: any) => e.kegiatan_rutin_id));
+
   let rutinQuery = supabase
     .from('kegiatan_rutin')
     .select('*')
@@ -58,6 +71,23 @@ export async function checkConflicts(
   const { data: rutinRes } = await rutinQuery;
 
   for (const row of (rutinRes || [])) {
+    // If this routine instance has an exception on this date, skip
+    if (exceptionIds.has(row.id)) {
+      continue;
+    }
+
+    // Check semester bounds and batas_minggu_berulang
+    if (profile?.semester_start && profile?.semester_end) {
+      if (wibDateStr < profile.semester_start || wibDateStr > profile.semester_end) {
+        continue;
+      }
+      const semStart = new Date(profile.semester_start);
+      const weekNum = Math.floor((new Date(wibDateStr).getTime() - semStart.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+      if (weekNum > (row.batas_minggu_berulang || 16)) {
+        continue;
+      }
+    }
+
     const startStr = `${wibDateStr}T${row.jam_mulai}`;
     const endStr = `${wibDateStr}T${row.jam_selesai}`;
     conflicts.push({

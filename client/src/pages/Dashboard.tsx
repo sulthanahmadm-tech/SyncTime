@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DndContext } from '@dnd-kit/core';
 import { Header } from '../components/Layout/Header';
 import { Sidebar } from '../components/Layout/Sidebar';
@@ -20,7 +21,14 @@ import { useAuth } from '../contexts/AuthContext';
 
 const Dashboard = () => {
   const { blocks, kategoriList, currentWeekStart, nextWeek, prevWeek, goToToday, refetch, refetchKategori } = useCalendarData();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (profile && !profile.onboarding_completed) {
+      navigate('/onboarding', { replace: true });
+    }
+  }, [profile, navigate]);
   
   const [filters, setFilters] = useState({ rutin: true, dinamis: true });
   const [matkulWajibOpen, setMatkulWajibOpen] = useState(false);
@@ -64,8 +72,10 @@ const Dashboard = () => {
     const dayIndex = d.getDay() === 0 ? 7 : d.getDay();
     const timeStr = `${hour.toString().padStart(2, '0')}:00`;
     
-    const startIso = new Date(`${dateStr}T${timeStr}:00`).toISOString();
-    const endIso = new Date(`${dateStr}T${(hour+1).toString().padStart(2, '0')}:00:00`).toISOString();
+    const startDate = new Date(`${dateStr}T${timeStr}:00`);
+    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+    const startIso = startDate.toISOString();
+    const endIso = endDate.toISOString();
 
     setFormState({
       type: 'dinamis',

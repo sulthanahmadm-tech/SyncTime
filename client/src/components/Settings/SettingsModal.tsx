@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Moon, Sun, Settings, Clock, Tag, Trash2, Edit2, Plus } from 'lucide-react';
+import { X, Moon, Sun, Monitor, Settings, Clock, Tag, Trash2, Edit2, Plus } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { getAllRutin, getAllDinamis, getKategori, deleteKategori, deleteRutin, deleteDinamis, createKategori, updateKategori } from '../../lib/api';
 import type { Kategori, KegiatanRutin, KegiatanDinamis } from '../../lib/types';
@@ -108,27 +108,27 @@ export const SettingsModal = ({ isOpen, onClose, onEditRutin, onEditDinamis, onR
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-4xl h-[85vh] flex overflow-hidden border border-gray-200 dark:border-gray-800 transition-colors duration-200">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col md:flex-row overflow-hidden border border-gray-200 dark:border-gray-800 transition-colors duration-200">
         
         {/* Sidebar Tabs */}
-        <div className="w-64 bg-gray-50 dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 p-4 flex flex-col gap-2 shrink-0 transition-colors duration-200">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 px-2 flex items-center gap-2">
+        <div className="w-full md:w-64 bg-gray-50 dark:bg-gray-950 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-800 p-3 md:p-4 flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-x-visible shrink-0 transition-colors duration-200">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1 md:mb-6 px-2 flex items-center gap-2 shrink-0">
             <Settings className="w-5 h-5" /> Settings
           </h2>
           
-          <button onClick={() => setActiveTab('general')} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${activeTab === 'general' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800'}`}>
+          <button onClick={() => setActiveTab('general')} className={`flex items-center gap-3 px-4 py-2.5 md:py-3 rounded-lg font-medium whitespace-nowrap transition-colors ${activeTab === 'general' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800'}`}>
             <Settings className="w-4 h-4" /> General
           </button>
           
-          <button onClick={() => setActiveTab('kategori')} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${activeTab === 'kategori' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800'}`}>
+          <button onClick={() => setActiveTab('kategori')} className={`flex items-center gap-3 px-4 py-2.5 md:py-3 rounded-lg font-medium whitespace-nowrap transition-colors ${activeTab === 'kategori' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800'}`}>
             <Tag className="w-4 h-4" /> Kategori
           </button>
           
-          <button onClick={() => setActiveTab('rutin')} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${activeTab === 'rutin' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800'}`}>
+          <button onClick={() => setActiveTab('rutin')} className={`flex items-center gap-3 px-4 py-2.5 md:py-3 rounded-lg font-medium whitespace-nowrap transition-colors ${activeTab === 'rutin' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800'}`}>
             <Clock className="w-4 h-4" /> Jadwal Rutin
           </button>
 
-          <button onClick={() => setActiveTab('dinamis')} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${activeTab === 'dinamis' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800'}`}>
+          <button onClick={() => setActiveTab('dinamis')} className={`flex items-center gap-3 px-4 py-2.5 md:py-3 rounded-lg font-medium whitespace-nowrap transition-colors ${activeTab === 'dinamis' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800'}`}>
             <Clock className="w-4 h-4" /> Jadwal Dinamis
           </button>
         </div>
@@ -155,12 +155,15 @@ export const SettingsModal = ({ isOpen, onClose, onEditRutin, onEditDinamis, onR
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Choose your preferred lighting</p>
                   </div>
                   
-                  <div className="flex bg-gray-200 dark:bg-gray-950 p-1 rounded-lg">
-                    <button onClick={() => setTheme('light')} className={`p-2 rounded-md transition-all ${theme === 'light' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}>
+                  <div className="flex bg-gray-200 dark:bg-gray-950 p-1 rounded-lg gap-1">
+                    <button onClick={() => setTheme('light')} className={`p-2 rounded-md transition-all ${theme === 'light' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`} title="Light">
                       <Sun className="w-4 h-4" />
                     </button>
-                    <button onClick={() => setTheme('dark')} className={`p-2 rounded-md transition-all ${theme === 'dark' ? 'bg-gray-800 shadow-sm text-emerald-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}>
+                    <button onClick={() => setTheme('dark')} className={`p-2 rounded-md transition-all ${theme === 'dark' ? 'bg-gray-800 shadow-sm text-emerald-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`} title="Dark">
                       <Moon className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => setTheme('system')} className={`p-2 rounded-md transition-all ${theme === 'system' ? 'bg-gray-100 dark:bg-gray-800 shadow-sm text-emerald-500 dark:text-emerald-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`} title="System">
+                      <Monitor className="w-4 h-4" />
                     </button>
                   </div>
                 </div>

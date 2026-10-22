@@ -27,13 +27,13 @@ const DayColumn = ({ date, blocks, onBlockClick, onEmptyCellClick, onToggleCompl
 
   const now = new Date();
   const isToday = getLocalDateString(now) === dateStr;
-  const currentMinutePosition = isToday ? (now.getHours() - 6) * 60 + now.getMinutes() : null;
+  const currentMinutePosition = isToday ? now.getHours() * 60 + now.getMinutes() : null;
 
   return (
     <div ref={setNodeRef} className="flex-1 border-r border-gray-200 dark:border-gray-800 relative bg-white dark:bg-gray-900 min-w-[120px]">
       <div className="h-12 border-b border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center sticky top-0 bg-white dark:bg-gray-900 z-10">
         <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{DAY_NAMES[date.getDay() === 0 ? 6 : date.getDay() - 1]}</span>
-        <span className={`text-lg ${isToday ? 'bg-emerald-600 dark:bg-indigo-600 w-8 h-8 rounded-full flex items-center justify-center text-gray-900 dark:text-white' : 'text-gray-200'}`}>
+        <span className={`text-lg ${isToday ? 'bg-emerald-600 dark:bg-indigo-600 w-8 h-8 rounded-full flex items-center justify-center text-white' : 'text-gray-700 dark:text-gray-300'}`}>
           {date.getDate()}
         </span>
       </div>

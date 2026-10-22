@@ -33,6 +33,25 @@ router.get('/weekly', async (req: AuthenticatedRequest, res, next) => {
       };
     }
 
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('semester_start, semester_end')
+      .eq('id', userId)
+      .single();
+
+    const startDateStr = start.toISOString().split('T')[0];
+    const endDateStr = end.toISOString().split('T')[0];
+
+    const { data: exceptionsRes, error: exceptionsError } = await supabase
+      .from('rutin_exceptions')
+      .select('kegiatan_rutin_id, tanggal_dilewati, kegiatan_rutin!inner(user_id)')
+      .eq('kegiatan_rutin.user_id', userId)
+      .gte('tanggal_dilewati', startDateStr)
+      .lt('tanggal_dilewati', endDateStr);
+
+    if (exceptionsError) throw exceptionsError;
+    const exceptionSet = new Set((exceptionsRes || []).map((e: any) => `${e.kegiatan_rutin_id}-${e.tanggal_dilewati}`));
+
     // Process Rutin
     const { data: rutinRes, error: rutinError } = await supabase
       .from('kegiatan_rutin')
@@ -43,6 +62,28 @@ router.get('/weekly', async (req: AuthenticatedRequest, res, next) => {
     
     for (const r of (rutinRes || [])) {
       if (stats[r.kategori_id]) {
+        const dayOffset = r.hari_mingguan - 1;
+        const eventDate = new Date(start);
+        eventDate.setDate(eventDate.getDate() + dayOffset);
+        const dateStr = eventDate.toISOString().split('T')[0];
+
+        // Skip if exception exists for this date
+        if (exceptionSet.has(`${r.id}-${dateStr}`)) {
+          continue;
+        }
+
+        // Verify semester bounds and week limit
+        if (profile?.semester_start && profile?.semester_end) {
+          if (dateStr < profile.semester_start || dateStr > profile.semester_end) {
+            continue;
+          }
+          const semStart = new Date(profile.semester_start);
+          const weekNum = Math.floor((new Date(dateStr).getTime() - semStart.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+          if (weekNum > (r.batas_minggu_berulang || 16)) {
+            continue;
+          }
+        }
+
         // Calculate duration
         const startD = new Date(`1970-01-01T${r.jam_mulai}Z`);
         const endD = new Date(`1970-01-01T${r.jam_selesai}Z`);

@@ -50,62 +50,27 @@ router.get('/matkul-wajib', async (req, res, next) => {
         next(err);
     }
 });
-router.get('/weekly', async (req, res, next) => {
-    const { week_start } = req.query;
-    if (!week_start || typeof week_start !== 'string') {
-        return res.status(400).json({ error: 'week_start query param is required (YYYY-MM-DD)' });
-    }
-    try {
-        const userId = req.user.id;
-        const start = new Date(week_start);
-        const { data, error } = await connection_1.supabase
-            .from('kegiatan_rutin')
-            .select('*, kategori!inner(warna_hex, nama_kategori)')
-            .eq('user_id', userId);
-        if (error)
-            throw error;
-        const blocks = [];
-        for (const row of (data || [])) {
-            const dayOffset = row.hari_mingguan - 1;
-            const eventDate = new Date(start);
-            eventDate.setDate(eventDate.getDate() + dayOffset);
-            const dateStr = eventDate.toISOString().split('T')[0];
-            // jam_mulai and jam_selesai are TIME type from PostgreSQL, returned as 'HH:MM:SS'
-            const startDateTimeStr = `${dateStr}T${row.jam_mulai}`;
-            const endDateTimeStr = `${dateStr}T${row.jam_selesai}`;
-            blocks.push({
-                id: row.id,
-                type: 'rutin',
-                kategori_id: row.kategori_id,
-                judul: row.judul,
-                warna_hex: row.kategori.warna_hex,
-                nama_kategori: row.kategori.nama_kategori,
-                start: startDateTimeStr,
-                end: endDateTimeStr,
-                hari_mingguan: row.hari_mingguan
-            });
-        }
-        res.json(blocks);
-    }
-    catch (err) {
-        next(err);
-    }
-});
 router.post('/', async (req, res, next) => {
     const { kategori_id, judul, hari_mingguan, jam_mulai, jam_selesai, batas_minggu_berulang, is_matkul_wajib } = req.body;
     const { force } = req.query;
     try {
         const userId = req.user.id;
-        const now = new Date();
-        let currentDay = now.getDay();
+        const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
+        const nowWib = new Date(Date.now() + WIB_OFFSET_MS);
+        let currentDay = nowWib.getUTCDay();
         if (currentDay === 0)
             currentDay = 7;
-        const diff = hari_mingguan - currentDay;
-        const checkDate = new Date(now);
-        checkDate.setDate(checkDate.getDate() + diff);
+        const diff = Number(hari_mingguan) - currentDay;
+        const checkDate = new Date(nowWib);
+        checkDate.setUTCDate(checkDate.getUTCDate() + diff);
         const dateStr = checkDate.toISOString().split('T')[0];
-        const startDate = new Date(`${dateStr}T${jam_mulai}`);
-        const endDate = new Date(`${dateStr}T${jam_selesai}`);
+        const normStart = String(jam_mulai).length === 5 ? `${jam_mulai}:00` : String(jam_mulai);
+        const normEnd = String(jam_selesai).length === 5 ? `${jam_selesai}:00` : String(jam_selesai);
+        if (normEnd <= normStart) {
+            return res.status(400).json({ error: 'jam_selesai must be greater than jam_mulai' });
+        }
+        const startDate = new Date(`${dateStr}T${normStart}+07:00`);
+        const endDate = new Date(`${dateStr}T${normEnd}+07:00`);
         const check = await (0, conflictChecker_1.checkConflicts)(userId, { start: startDate, end: endDate });
         if (check.hasConflict && force !== 'true') {
             return res.status(409).json(check);
@@ -138,16 +103,22 @@ router.put('/:id', async (req, res, next) => {
     const { force } = req.query;
     try {
         const userId = req.user.id;
-        const now = new Date();
-        let currentDay = now.getDay();
+        const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
+        const nowWib = new Date(Date.now() + WIB_OFFSET_MS);
+        let currentDay = nowWib.getUTCDay();
         if (currentDay === 0)
             currentDay = 7;
-        const diff = hari_mingguan - currentDay;
-        const checkDate = new Date(now);
-        checkDate.setDate(checkDate.getDate() + diff);
+        const diff = Number(hari_mingguan) - currentDay;
+        const checkDate = new Date(nowWib);
+        checkDate.setUTCDate(checkDate.getUTCDate() + diff);
         const dateStr = checkDate.toISOString().split('T')[0];
-        const startDate = new Date(`${dateStr}T${jam_mulai}`);
-        const endDate = new Date(`${dateStr}T${jam_selesai}`);
+        const normStart = String(jam_mulai).length === 5 ? `${jam_mulai}:00` : String(jam_mulai);
+        const normEnd = String(jam_selesai).length === 5 ? `${jam_selesai}:00` : String(jam_selesai);
+        if (normEnd <= normStart) {
+            return res.status(400).json({ error: 'jam_selesai must be greater than jam_mulai' });
+        }
+        const startDate = new Date(`${dateStr}T${normStart}+07:00`);
+        const endDate = new Date(`${dateStr}T${normEnd}+07:00`);
         const check = await (0, conflictChecker_1.checkConflicts)(userId, { start: startDate, end: endDate, excludeId: Number(id), excludeType: 'rutin' });
         if (check.hasConflict && force !== 'true') {
             return res.status(409).json(check);

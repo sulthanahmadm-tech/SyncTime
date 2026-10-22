@@ -39,7 +39,7 @@ export const Header = ({ currentWeekStart, onPrev, onNext, onToday, onOpenFilter
         >
           &lt; <span className="hidden md:inline ml-1">Prev</span>
         </button>
-        <span className="font-medium text-xs sm:text-sm text-center min-w-0 sm:min-w-36 px-1 truncate text-gray-200">
+        <span className="font-medium text-xs sm:text-sm text-center min-w-0 sm:min-w-36 px-1 truncate text-gray-700 dark:text-gray-200">
           {weekRange}
         </span>
         <button 

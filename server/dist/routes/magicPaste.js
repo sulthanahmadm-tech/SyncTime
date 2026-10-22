@@ -17,7 +17,36 @@ router.post('/magic-paste', async (req, res, next) => {
         const userId = req.user.id;
         const genAI = new generative_ai_1.GoogleGenerativeAI(apiKey);
         let model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
-        const prompt = `Kamu adalah sistem ekstraksi data jadwal. Ubah teks berantakan yang diberikan user menjadi format JSON array murni. Key yang harus ada di setiap objek: judul (string), hari_mingguan (integer 1-7, di mana 1 adalah Senin), jam_mulai (string format HH:MM:SS), jam_selesai (string format HH:MM:SS). Jangan tambahkan format markdown seperti \`\`\`json, jangan ada teks pembuka/penutup, kembalikan HANYA array JSON yang valid agar bisa langsung di-parse dengan JSON.parse().\n\nTeks Jadwal:\n${rawText}`;
+        const prompt = `Kamu adalah sistem ekstraksi jadwal kuliah dan kegiatan akademik mahasiswa.
+Tugasmu adalah mengubah teks input mentah (bisa berupa teks jadwal semester/SIAKAD, pengumuman perkuliahan berulang mingguan, atau agenda/acara dengan tanggal kalender spesifik) menjadi format JSON array murni tanpa pembuka/penutup markdown.
+
+Setiap objek dalam array JSON HARUS memiliki salah satu dari dua format berikut:
+
+Format 1: Jadwal Kuliah Rutin / Berulang Mingguan:
+{
+  "is_rutin": true,
+  "judul": "Nama Mata Kuliah / Kegiatan",
+  "hari_mingguan": 1, // integer 1-7 (1=Senin, 2=Selasa, 3=Rabu, 4=Kamis, 5=Jumat, 6=Sabtu, 7=Minggu)
+  "jam_mulai": "08:00:00", // format HH:MM:SS
+  "jam_selesai": "09:40:00" // format HH:MM:SS
+}
+
+Format 2: Jadwal Kegiatan Dinamis / Sekali Waktu (kegiatan yang memiliki tanggal kalender spesifik, seminar, ujian bertanggal tertentu, deadline tugas):
+{
+  "is_rutin": false,
+  "judul": "Nama Acara / Ujian / Tugas",
+  "waktu_mulai": "2026-10-25T09:00:00", // format ISO 8601 dengan tanggal kalender spesifik
+  "waktu_selesai": "2026-10-25T11:00:00" // format ISO 8601 (jika waktu selesai tidak ditulis, buat estimasi 1-2 jam setelah waktu mulai)
+}
+
+Aturan klasifikasi:
+- Jika teks menyebut nama hari tanpa tanggal kalender spesifik (contoh: "Senin 08.00-10.00 Algoritma"), golongkan ke Format 1 (is_rutin: true).
+- Jika teks memiliki tanggal kalender tertentu (contoh: "28 Oktober 2026", "2026-11-05 jam 14:00"), golongkan ke Format 2 (is_rutin: false).
+- Jam mulai dan selesai pada jadwal rutin harus format HH:MM:SS (contoh '08:00:00').
+- Kembalikan HANYA array JSON yang valid agar bisa langsung di-parse dengan JSON.parse(). Jangan sertakan markdown \`\`\`json.
+
+Teks Masukan:
+${rawText}`;
         let result;
         try {
             result = await model.generateContent(prompt);
@@ -57,47 +86,94 @@ router.post('/magic-paste', async (req, res, next) => {
             console.error('Failed to parse Gemini response:', textResponse);
             return res.status(400).json({ error: 'Gagal mengekstrak JSON valid dari teks yang diberikan.' });
         }
-        // Get default Kuliah category for this user
-        const { data: kuliahKat } = await connection_1.supabase
-            .from('kategori')
-            .select('id')
-            .eq('user_id', userId)
-            .eq('nama_kategori', 'Kuliah')
+        // Get user semester bounds to calculate batasMinggu
+        const { data: profile } = await connection_1.supabase
+            .from('profiles')
+            .select('semester_start, semester_end')
+            .eq('id', userId)
             .single();
-        let kategoriId;
-        if (kuliahKat) {
-            kategoriId = kuliahKat.id;
+        let batasMinggu = 16;
+        if (profile?.semester_start && profile?.semester_end) {
+            const diffWeeks = Math.ceil((new Date(profile.semester_end).getTime() - new Date(profile.semester_start).getTime()) /
+                (7 * 24 * 60 * 60 * 1000));
+            if (diffWeeks > 0)
+                batasMinggu = diffWeeks;
         }
-        else {
-            // Fallback to first category
-            const { data: firstKat } = await connection_1.supabase
-                .from('kategori')
-                .select('id')
-                .eq('user_id', userId)
-                .limit(1)
-                .single();
-            kategoriId = firstKat?.id || 1;
+        // Get default Kuliah category for this user
+        const { data: userCategories } = await connection_1.supabase
+            .from('kategori')
+            .select('id, nama_kategori')
+            .eq('user_id', userId);
+        const kuliahKat = userCategories?.find(k => k.nama_kategori.toLowerCase() === 'kuliah') || userCategories?.[0];
+        const kategoriId = kuliahKat?.id || 1;
+        // Build insert arrays for both routine and dynamic activities
+        const rutinItems = [];
+        const dinamisItems = [];
+        for (const item of scheduleData) {
+            const isRutin = item.is_rutin === true || (item.hari_mingguan && !item.waktu_mulai);
+            if (isRutin && item.judul && item.hari_mingguan && item.jam_mulai && item.jam_selesai) {
+                let jamMulai = String(item.jam_mulai).trim();
+                if (jamMulai.length === 5)
+                    jamMulai += ':00';
+                let jamSelesai = String(item.jam_selesai).trim();
+                if (jamSelesai.length === 5)
+                    jamSelesai += ':00';
+                rutinItems.push({
+                    user_id: userId,
+                    kategori_id: kategoriId,
+                    judul: item.judul,
+                    hari_mingguan: parseInt(item.hari_mingguan),
+                    jam_mulai: jamMulai,
+                    jam_selesai: jamSelesai,
+                    batas_minggu_berulang: batasMinggu,
+                    is_matkul_wajib: true
+                });
+            }
+            else if (!isRutin && item.judul && item.waktu_mulai) {
+                const start = new Date(item.waktu_mulai);
+                if (isNaN(start.getTime()))
+                    continue;
+                let end = item.waktu_selesai ? new Date(item.waktu_selesai) : new Date(start.getTime() + 60 * 60 * 1000);
+                if (isNaN(end.getTime()) || end <= start) {
+                    end = new Date(start.getTime() + 60 * 60 * 1000);
+                }
+                dinamisItems.push({
+                    user_id: userId,
+                    kategori_id: kategoriId,
+                    judul: item.judul,
+                    waktu_mulai: start.toISOString(),
+                    waktu_selesai: end.toISOString(),
+                    is_completed: false
+                });
+            }
         }
-        const batasMinggu = 16;
-        // Build insert array
-        const insertData = scheduleData
-            .filter(sched => sched.judul && sched.hari_mingguan && sched.jam_mulai && sched.jam_selesai)
-            .map(sched => ({
-            user_id: userId,
-            kategori_id: kategoriId,
-            judul: sched.judul,
-            hari_mingguan: sched.hari_mingguan,
-            jam_mulai: sched.jam_mulai,
-            jam_selesai: sched.jam_selesai,
-            batas_minggu_berulang: batasMinggu
-        }));
-        const { data: insertedData, error } = await connection_1.supabase
-            .from('kegiatan_rutin')
-            .insert(insertData)
-            .select();
-        if (error)
-            throw error;
-        res.json({ message: 'Jadwal berhasil diekstrak dan disimpan.', data: insertedData });
+        let insertedRutin = [];
+        let insertedDinamis = [];
+        if (rutinItems.length > 0) {
+            const { data, error } = await connection_1.supabase
+                .from('kegiatan_rutin')
+                .insert(rutinItems)
+                .select();
+            if (error)
+                throw error;
+            insertedRutin = data || [];
+        }
+        if (dinamisItems.length > 0) {
+            const { data, error } = await connection_1.supabase
+                .from('kegiatan_dinamis')
+                .insert(dinamisItems)
+                .select();
+            if (error)
+                throw error;
+            insertedDinamis = data || [];
+        }
+        const totalCount = insertedRutin.length + insertedDinamis.length;
+        res.json({
+            message: `Jadwal berhasil diekstrak dan disimpan (${totalCount} item).`,
+            data: [...insertedRutin, ...insertedDinamis],
+            rutin: insertedRutin,
+            dinamis: insertedDinamis
+        });
     }
     catch (error) {
         console.error('Magic Paste Error:', error);

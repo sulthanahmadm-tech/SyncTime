@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import type { CalendarBlock, ConflictDetail, Kategori, KegiatanDinamis, KegiatanRutin } from './types';
 
-class ConflictError extends Error {
+export class ConflictError extends Error {
   conflicts: ConflictDetail[];
   constructor(message: string, conflicts: ConflictDetail[]) {
     super(message);
@@ -108,8 +108,12 @@ export const toggleComplete = (id: number): Promise<KegiatanDinamis> =>
 export const deleteRutin = (id: number): Promise<void> => 
   fetchApi(`/api/rutin/${id}`, { method: 'DELETE' });
 
+export const deleteKegiatanRutin = deleteRutin;
+
 export const deleteDinamis = (id: number): Promise<void> => 
   fetchApi(`/api/dinamis/${id}`, { method: 'DELETE' });
+
+export const deleteKegiatanDinamis = deleteDinamis;
 
 export const getAnalytics = (weekStart: string): Promise<{ nama_kategori: string, warna_hex: string, total_hours: number }[]> => 
   fetchApi(`/api/analytics/weekly?week_start=${weekStart}`);

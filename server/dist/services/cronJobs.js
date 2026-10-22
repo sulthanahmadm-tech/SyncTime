@@ -7,18 +7,26 @@ exports.startCronJobs = exports.checkAndSendDailySchedule = exports.checkAndSend
 const node_cron_1 = __importDefault(require("node-cron"));
 const connection_1 = require("../db/connection");
 const emailNotifier_1 = require("./emailNotifier");
+const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
 const checkAndSendReminders = async () => {
     try {
         const now = new Date();
         const targetTime = new Date(now.getTime() + 20 * 60000); // 20 minutes ahead
-        let dayOfWeek = targetTime.getDay();
+        const targetWib = new Date(targetTime.getTime() + WIB_OFFSET_MS);
+        let dayOfWeek = targetWib.getUTCDay();
         if (dayOfWeek === 0)
             dayOfWeek = 7;
-        const targetTimeStr = targetTime.toTimeString().substring(0, 5) + ':00';
+        const targetYear = targetWib.getUTCFullYear();
+        const targetMonth = String(targetWib.getUTCMonth() + 1).padStart(2, '0');
+        const targetDate = String(targetWib.getUTCDate()).padStart(2, '0');
+        const targetDateStr = `${targetYear}-${targetMonth}-${targetDate}`;
+        const targetHours = String(targetWib.getUTCHours()).padStart(2, '0');
+        const targetMinutes = String(targetWib.getUTCMinutes()).padStart(2, '0');
+        const targetTimeStr = `${targetHours}:${targetMinutes}:00`;
         // Get all users with email
         const { data: users, error: usersError } = await connection_1.supabase
             .from('profiles')
-            .select('id, email')
+            .select('id, email, semester_start, semester_end')
             .not('email', 'is', null);
         if (usersError || !users) {
             console.error('[Cron] Failed to fetch users:', usersError);
@@ -34,9 +42,29 @@ const checkAndSendReminders = async () => {
                 .eq('user_id', user.id)
                 .eq('hari_mingguan', dayOfWeek)
                 .eq('jam_mulai', targetTimeStr);
-            for (const r of (rutinRes || [])) {
-                const subject = `⏰ Pengingat: ${r.judul} dimulai 20 menit lagi`;
-                const html = `
+            if (rutinRes && rutinRes.length > 0) {
+                const { data: exceptionsRes } = await connection_1.supabase
+                    .from('rutin_exceptions')
+                    .select('kegiatan_rutin_id')
+                    .in('kegiatan_rutin_id', rutinRes.map(r => r.id))
+                    .eq('tanggal_dilewati', targetDateStr);
+                const skippedRutinIds = new Set((exceptionsRes || []).map(e => e.kegiatan_rutin_id));
+                for (const r of rutinRes) {
+                    if (skippedRutinIds.has(r.id))
+                        continue;
+                    // Check semester bounds and batas_minggu_berulang
+                    if (user.semester_start && user.semester_end) {
+                        if (targetDateStr < user.semester_start || targetDateStr > user.semester_end) {
+                            continue;
+                        }
+                        const semStart = new Date(user.semester_start);
+                        const weekNum = Math.floor((new Date(targetDateStr).getTime() - semStart.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+                        if (weekNum > (r.batas_minggu_berulang || 16)) {
+                            continue;
+                        }
+                    }
+                    const subject = `⏰ Pengingat: ${r.judul} dimulai 20 menit lagi`;
+                    const html = `
           <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; background: #1a1a2e; color: #e0e0e0; border-radius: 12px;">
             <h2 style="color: #818cf8; margin-top: 0;">🔔 Pengingat Jadwal Rutin</h2>
             <div style="background: #16213e; padding: 16px; border-radius: 8px; border-left: 4px solid #818cf8;">
@@ -48,11 +76,12 @@ const checkAndSendReminders = async () => {
             <p style="margin-top: 16px; font-size: 13px; color: #6b7280;">Dikirim otomatis oleh SyncTime</p>
           </div>
         `;
-                await (0, emailNotifier_1.sendEmailNotification)(user.email, subject, html);
+                    await (0, emailNotifier_1.sendEmailNotification)(user.email, subject, html);
+                }
             }
             // Check Dinamis for this user
             const targetTimeStart = new Date(targetTime);
-            targetTimeStart.setSeconds(0, 0);
+            targetTimeStart.setUTCSeconds(0, 0);
             const targetTimeEnd = new Date(targetTimeStart.getTime() + 60000);
             const { data: dinamisRes } = await connection_1.supabase
                 .from('kegiatan_dinamis')
@@ -62,7 +91,8 @@ const checkAndSendReminders = async () => {
                 .lt('waktu_mulai', targetTimeEnd.toISOString())
                 .eq('is_completed', false);
             for (const d of (dinamisRes || [])) {
-                const timeStr = new Date(d.waktu_mulai).toTimeString().substring(0, 5);
+                const dinamisWib = new Date(new Date(d.waktu_mulai).getTime() + WIB_OFFSET_MS);
+                const timeStr = `${String(dinamisWib.getUTCHours()).padStart(2, '0')}:${String(dinamisWib.getUTCMinutes()).padStart(2, '0')}`;
                 const subject = `⏰ Pengingat: ${d.judul} dimulai 20 menit lagi`;
                 const html = `
           <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; background: #1a1a2e; color: #e0e0e0; border-radius: 12px;">
@@ -88,15 +118,13 @@ exports.checkAndSendReminders = checkAndSendReminders;
 const checkAndSendDailySchedule = async () => {
     try {
         const now = new Date();
-        const gmt7Time = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+        const gmt7Time = new Date(now.getTime() + WIB_OFFSET_MS);
         const gmt7Hour = gmt7Time.getUTCHours();
-        let isTomorrow = false;
         let labelHari = 'Hari Ini';
         // If it's afternoon/evening in GMT+7 (e.g., 20:00), prepare schedule for tomorrow.
         // If it's morning (e.g., 06:00), prepare schedule for today.
         if (gmt7Hour >= 12) {
             gmt7Time.setUTCDate(gmt7Time.getUTCDate() + 1);
-            isTomorrow = true;
             labelHari = 'Besok';
         }
         const targetYear = gmt7Time.getUTCFullYear();
@@ -108,10 +136,11 @@ const checkAndSendDailySchedule = async () => {
         const targetStartUTC = new Date(Date.UTC(targetYear, targetMonth, targetDate, -7, 0, 0, 0));
         const targetEndUTC = new Date(Date.UTC(targetYear, targetMonth, targetDate, 16, 59, 59, 999));
         const dateStr = `${String(targetDate).padStart(2, '0')}/${String(targetMonth + 1).padStart(2, '0')}/${targetYear}`;
+        const isoDateStr = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(targetDate).padStart(2, '0')}`;
         // Get all users with email
         const { data: users, error: usersError } = await connection_1.supabase
             .from('profiles')
-            .select('id, email')
+            .select('id, email, semester_start, semester_end')
             .not('email', 'is', null);
         if (usersError || !users) {
             console.error('[Daily Cron] Failed to fetch users:', usersError);
@@ -125,6 +154,15 @@ const checkAndSendDailySchedule = async () => {
                 .select('*, kategori!inner(nama_kategori)')
                 .eq('user_id', user.id)
                 .eq('hari_mingguan', dayOfWeek);
+            let skippedRutinIds = new Set();
+            if (rutinRes && rutinRes.length > 0) {
+                const { data: exceptionsRes } = await connection_1.supabase
+                    .from('rutin_exceptions')
+                    .select('kegiatan_rutin_id')
+                    .in('kegiatan_rutin_id', rutinRes.map(r => r.id))
+                    .eq('tanggal_dilewati', isoDateStr);
+                skippedRutinIds = new Set((exceptionsRes || []).map(e => e.kegiatan_rutin_id));
+            }
             const { data: dinamisRes } = await connection_1.supabase
                 .from('kegiatan_dinamis')
                 .select('*, kategori!inner(nama_kategori)')
@@ -133,6 +171,18 @@ const checkAndSendDailySchedule = async () => {
                 .lt('waktu_mulai', targetEndUTC.toISOString());
             const scheduleItems = [];
             (rutinRes || []).forEach(r => {
+                if (skippedRutinIds.has(r.id))
+                    return;
+                if (user.semester_start && user.semester_end) {
+                    if (isoDateStr < user.semester_start || isoDateStr > user.semester_end) {
+                        return;
+                    }
+                    const semStart = new Date(user.semester_start);
+                    const weekNum = Math.floor((new Date(isoDateStr).getTime() - semStart.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+                    if (weekNum > (r.batas_minggu_berulang || 16)) {
+                        return;
+                    }
+                }
                 scheduleItems.push({
                     judul: r.judul,
                     kategori: r.kategori?.nama_kategori || '-',
@@ -142,7 +192,7 @@ const checkAndSendDailySchedule = async () => {
             });
             (dinamisRes || []).forEach(d => {
                 const dateObj = new Date(d.waktu_mulai);
-                const gmt7Dinamis = new Date(dateObj.getTime() + 7 * 3600 * 1000);
+                const gmt7Dinamis = new Date(dateObj.getTime() + WIB_OFFSET_MS);
                 const h = String(gmt7Dinamis.getUTCHours()).padStart(2, '0');
                 const m = String(gmt7Dinamis.getUTCMinutes()).padStart(2, '0');
                 scheduleItems.push({

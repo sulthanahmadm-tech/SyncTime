@@ -4,7 +4,7 @@ import { Header } from '../components/Layout/Header';
 import { WeeklyCalendar } from '../components/Calendar/WeeklyCalendar';
 import { getSharedFreeTime } from '../lib/api';
 import type { CalendarBlock } from '../lib/types';
-import { getWeekStart } from '../lib/utils';
+import { getWeekStart, parseLocalDate } from '../lib/utils';
 
 const SharedCalendar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,13 +20,13 @@ const SharedCalendar = () => {
   }, [weekStartParam, userId]);
 
   const handleNext = () => {
-    const d = new Date(weekStartParam);
+    const d = parseLocalDate(weekStartParam);
     d.setDate(d.getDate() + 7);
     setSearchParams({ week_start: getWeekStart(d), user_id: userId || '' });
   };
 
   const handlePrev = () => {
-    const d = new Date(weekStartParam);
+    const d = parseLocalDate(weekStartParam);
     d.setDate(d.getDate() - 7);
     setSearchParams({ week_start: getWeekStart(d), user_id: userId || '' });
   };

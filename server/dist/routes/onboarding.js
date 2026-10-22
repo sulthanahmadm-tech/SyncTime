@@ -11,6 +11,9 @@ router.put('/semester', async (req, res, next) => {
         if (!semester_start || !semester_end) {
             return res.status(400).json({ error: 'semester_start and semester_end are required' });
         }
+        if (semester_end <= semester_start) {
+            return res.status(400).json({ error: 'semester_end must be greater than semester_start' });
+        }
         const { data, error } = await connection_1.supabase
             .from('profiles')
             .update({ semester_start, semester_end })
@@ -32,6 +35,13 @@ router.post('/matkul', async (req, res, next) => {
         const { matkul_list } = req.body;
         if (!Array.isArray(matkul_list) || matkul_list.length === 0) {
             return res.status(400).json({ error: 'matkul_list array is required' });
+        }
+        for (const m of matkul_list) {
+            const normStart = String(m.jam_mulai).length === 5 ? `${m.jam_mulai}:00` : String(m.jam_mulai);
+            const normEnd = String(m.jam_selesai).length === 5 ? `${m.jam_selesai}:00` : String(m.jam_selesai);
+            if (normEnd <= normStart) {
+                return res.status(400).json({ error: `jam_selesai must be greater than jam_mulai for ${m.judul || 'matkul'}` });
+            }
         }
         // Get the 'Kuliah' category for this user
         const { data: kuliahKategori, error: katError } = await connection_1.supabase

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import type { KegiatanRutin, Kategori, Profile } from '../../lib/types';
-import { getMatkulWajib, getProfile, createRutin, deleteRutin, updateRutin, updateProfile } from '../../lib/api';
+import type { KegiatanRutin, Kategori, Profile, ConflictDetail } from '../../lib/types';
+import { getMatkulWajib, getProfile, createRutin, deleteRutin, updateRutin, updateProfile, ConflictError } from '../../lib/api';
+import { ConflictModal } from '../Calendar/ConflictModal';
 
 interface MatkulWajibModalProps {
   isOpen: boolean;
@@ -41,6 +42,16 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
     hari_mingguan: 1,
     jam_mulai: '',
     jam_selesai: ''
+  });
+
+  const [conflictModal, setConflictModal] = useState<{
+    isOpen: boolean;
+    conflicts: ConflictDetail[];
+    onForceSave: () => void;
+  }>({
+    isOpen: false,
+    conflicts: [],
+    onForceSave: () => {}
   });
 
   const fetchData = async () => {
@@ -86,6 +97,10 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
   const kuliahKategoriId = kuliahKategori ? kuliahKategori.id : (kategoriList.length > 0 ? kategoriList[0].id : 0);
 
   const handleSaveSemester = async () => {
+    if (semesterStart && semesterEnd && semesterEnd <= semesterStart) {
+      alert('Tanggal selesai semester harus lebih akhir dari tanggal mulai');
+      return;
+    }
     try {
       await updateProfile({ semester_start: semesterStart, semester_end: semesterEnd });
       setIsEditingSemester(false);
@@ -95,44 +110,72 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
     }
   };
 
-  const handleAddMatkul = async () => {
+  const handleAddMatkul = async (force: boolean = false) => {
+    if (newMatkul.jam_selesai <= newMatkul.jam_mulai) {
+      alert('Jam selesai harus lebih akhir dari jam mulai');
+      return;
+    }
+    const payload = {
+      judul: newMatkul.judul,
+      kategori_id: kuliahKategoriId,
+      hari_mingguan: newMatkul.hari_mingguan,
+      jam_mulai: newMatkul.jam_mulai + ':00',
+      jam_selesai: newMatkul.jam_selesai + ':00',
+      batas_minggu_berulang: 16,
+      is_matkul_wajib: true
+    };
     try {
-      await createRutin({
-        judul: newMatkul.judul,
-        kategori_id: kuliahKategoriId,
-        hari_mingguan: newMatkul.hari_mingguan,
-        jam_mulai: newMatkul.jam_mulai + ':00',
-        jam_selesai: newMatkul.jam_selesai + ':00',
-        batas_minggu_berulang: 16,
-        is_matkul_wajib: true
-      });
+      await createRutin(payload, force);
       setIsAdding(false);
       setNewMatkul({ judul: '', hari_mingguan: 1, jam_mulai: '', jam_selesai: '' });
+      setConflictModal(prev => ({ ...prev, isOpen: false }));
       fetchData();
       onSaved();
-    } catch (e) {
-      console.error(e);
-      alert('Gagal menambah matkul');
+    } catch (e: any) {
+      if (e instanceof ConflictError || e.name === 'ConflictError') {
+        setConflictModal({
+          isOpen: true,
+          conflicts: e.conflicts || [],
+          onForceSave: () => handleAddMatkul(true)
+        });
+      } else {
+        console.error(e);
+        alert(e.message || 'Gagal menambah matkul');
+      }
     }
   };
 
-  const handleUpdateMatkul = async (id: number) => {
+  const handleUpdateMatkul = async (id: number, force: boolean = false) => {
+    if (editForm.jam_selesai <= editForm.jam_mulai) {
+      alert('Jam selesai harus lebih akhir dari jam mulai');
+      return;
+    }
+    const payload = {
+      judul: editForm.judul,
+      kategori_id: kuliahKategoriId,
+      hari_mingguan: editForm.hari_mingguan,
+      jam_mulai: editForm.jam_mulai + (editForm.jam_mulai.length === 5 ? ':00' : ''),
+      jam_selesai: editForm.jam_selesai + (editForm.jam_selesai.length === 5 ? ':00' : ''),
+      batas_minggu_berulang: 16,
+      is_matkul_wajib: true
+    };
     try {
-      await updateRutin(id, {
-        judul: editForm.judul,
-        kategori_id: kuliahKategoriId,
-        hari_mingguan: editForm.hari_mingguan,
-        jam_mulai: editForm.jam_mulai + (editForm.jam_mulai.length === 5 ? ':00' : ''),
-        jam_selesai: editForm.jam_selesai + (editForm.jam_selesai.length === 5 ? ':00' : ''),
-        batas_minggu_berulang: 16,
-        is_matkul_wajib: true
-      });
+      await updateRutin(id, payload, force);
       setEditingId(null);
+      setConflictModal(prev => ({ ...prev, isOpen: false }));
       fetchData();
       onSaved();
-    } catch (e) {
-      console.error(e);
-      alert('Gagal mengubah matkul');
+    } catch (e: any) {
+      if (e instanceof ConflictError || e.name === 'ConflictError') {
+        setConflictModal({
+          isOpen: true,
+          conflicts: e.conflicts || [],
+          onForceSave: () => handleUpdateMatkul(id, true)
+        });
+      } else {
+        console.error(e);
+        alert(e.message || 'Gagal mengubah matkul');
+      }
     }
   };
 
@@ -188,7 +231,7 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
         <div className="p-6 overflow-y-auto flex-1">
           <div className="mb-8 bg-gray-100 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-300 dark:border-gray-700">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-medium text-gray-200">Periode Semester</h3>
+              <h3 className="font-medium text-gray-800 dark:text-gray-200">Periode Semester</h3>
               {!isEditingSemester && (
                 <button onClick={() => setIsEditingSemester(true)} className="text-sm text-emerald-600 dark:text-indigo-400 hover:text-indigo-300">
                   Edit Periode
@@ -206,7 +249,7 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
                   <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Selesai</label>
                   <input type="date" value={semesterEnd} onChange={e => setSemesterEnd(e.target.value)} className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white" />
                 </div>
-                <button onClick={handleSaveSemester} className="bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 text-gray-900 dark:text-white px-4 py-2 rounded transition">
+                <button onClick={handleSaveSemester} className="bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 text-white px-4 py-2 rounded transition font-medium">
                   Simpan
                 </button>
                 <button onClick={() => setIsEditingSemester(false)} className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 text-gray-900 dark:text-white px-4 py-2 rounded transition">
@@ -223,7 +266,7 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
           </div>
 
           <div className="space-y-4 mb-6">
-            <h3 className="font-medium text-gray-200">Daftar Matkul</h3>
+            <h3 className="font-medium text-gray-800 dark:text-gray-200">Daftar Matkul</h3>
             {matkulList.length === 0 && <p className="text-gray-500 text-sm">Belum ada matkul wajib.</p>}
             
             {matkulList.map(m => (
@@ -239,7 +282,7 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
                     <input type="time" value={editForm.jam_mulai} onChange={e => setEditForm({...editForm, jam_mulai: e.target.value})} className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white" />
                     <input type="time" value={editForm.jam_selesai} onChange={e => setEditForm({...editForm, jam_selesai: e.target.value})} className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white" />
                     <div className="flex gap-2">
-                      <button onClick={() => handleUpdateMatkul(m.id)} className="flex-1 bg-green-600 hover:bg-green-700 text-gray-900 dark:text-white rounded py-2 transition text-sm">Simpan</button>
+                      <button onClick={() => handleUpdateMatkul(m.id, false)} className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded py-2 transition text-sm font-medium">Simpan</button>
                       <button onClick={() => setEditingId(null)} className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 text-gray-900 dark:text-white rounded py-2 transition text-sm">Batal</button>
                     </div>
                   </div>
@@ -251,7 +294,7 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => startEdit(m)} className="p-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 rounded text-sm transition">Edit</button>
-                      <button onClick={() => handleDelete(m.id)} className="p-2 bg-red-900/50 hover:bg-red-800 text-red-200 rounded text-sm transition">Hapus</button>
+                      <button onClick={() => handleDelete(m.id)} className="p-2 bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/50 dark:hover:bg-red-800 dark:text-red-200 rounded text-sm transition">Hapus</button>
                     </div>
                   </div>
                 )}
@@ -276,7 +319,7 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
                 <input type="time" value={newMatkul.jam_mulai} onChange={e => setNewMatkul({...newMatkul, jam_mulai: e.target.value})} className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white" />
                 <input type="time" value={newMatkul.jam_selesai} onChange={e => setNewMatkul({...newMatkul, jam_selesai: e.target.value})} className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white" />
                 <div className="col-span-2 sm:col-span-4 flex gap-3 mt-2">
-                  <button onClick={handleAddMatkul} className="flex-1 bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 text-gray-900 dark:text-white rounded py-2 transition font-medium">Simpan Matkul</button>
+                  <button onClick={() => handleAddMatkul(false)} className="flex-1 bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 text-white rounded py-2 transition font-medium">Simpan Matkul</button>
                   <button onClick={() => setIsAdding(false)} className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 text-gray-900 dark:text-white rounded py-2 transition font-medium">Batal</button>
                 </div>
               </div>
@@ -284,6 +327,14 @@ export const MatkulWajibModal: React.FC<MatkulWajibModalProps> = ({ isOpen, onCl
           )}
         </div>
       </div>
+      {conflictModal.isOpen && (
+        <ConflictModal
+          isOpen={conflictModal.isOpen}
+          conflicts={conflictModal.conflicts}
+          onCancel={() => setConflictModal(prev => ({ ...prev, isOpen: false }))}
+          onForceSave={conflictModal.onForceSave}
+        />
+      )}
     </div>
   );
 };

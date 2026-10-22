@@ -9,6 +9,7 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [infoMessage, setInfoMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setInfoMessage('');
     setLoading(true);
 
     try {
@@ -46,8 +48,11 @@ const LoginPage = () => {
       } else {
         const { error } = await signUp(email, password);
         if (error) throw error;
-        // After signup, redirect to onboarding
-        navigate('/onboarding');
+        // Inform student that account is created and onboarding is required
+        setInfoMessage('Akun kamu berhasil dibuat! Mengarahkan ke halaman onboarding untuk melengkapi data semester dan jadwal kuliah...');
+        setTimeout(() => {
+          navigate('/onboarding');
+        }, 1200);
       }
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan');
@@ -72,14 +77,14 @@ const LoginPage = () => {
             <button
               type="button"
               className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${isLogin ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
-              onClick={() => setIsLogin(true)}
+              onClick={() => { setIsLogin(true); setError(''); setInfoMessage(''); }}
             >
               Masuk
             </button>
             <button
               type="button"
               className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${!isLogin ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
-              onClick={() => setIsLogin(false)}
+              onClick={() => { setIsLogin(false); setError(''); setInfoMessage(''); }}
             >
               Daftar
             </button>
@@ -88,6 +93,12 @@ const LoginPage = () => {
           {error && (
             <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
               {error}
+            </div>
+          )}
+
+          {infoMessage && (
+            <div className="mb-4 p-3 bg-emerald-50 text-emerald-700 text-sm rounded-lg border border-emerald-200">
+              {infoMessage}
             </div>
           )}
 
@@ -119,7 +130,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-gray-900 dark:text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all disabled:opacity-70 flex items-center justify-center mt-6"
+              className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all disabled:opacity-70 flex items-center justify-center mt-6"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

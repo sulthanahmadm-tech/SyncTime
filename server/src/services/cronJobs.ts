@@ -25,7 +25,7 @@ export const checkAndSendReminders = async () => {
     // Get all users with email
     const { data: users, error: usersError } = await supabase
       .from('profiles')
-      .select('id, email')
+      .select('id, email, semester_start, semester_end')
       .not('email', 'is', null);
 
     if (usersError || !users) {
@@ -55,6 +55,18 @@ export const checkAndSendReminders = async () => {
 
         for (const r of rutinRes) {
           if (skippedRutinIds.has(r.id)) continue;
+
+          // Check semester bounds and batas_minggu_berulang
+          if (user.semester_start && user.semester_end) {
+            if (targetDateStr < user.semester_start || targetDateStr > user.semester_end) {
+              continue;
+            }
+            const semStart = new Date(user.semester_start);
+            const weekNum = Math.floor((new Date(targetDateStr).getTime() - semStart.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+            if (weekNum > (r.batas_minggu_berulang || 16)) {
+              continue;
+            }
+          }
 
           const subject = `⏰ Pengingat: ${r.judul} dimulai 20 menit lagi`;
           const html = `
@@ -141,7 +153,7 @@ export const checkAndSendDailySchedule = async () => {
     // Get all users with email
     const { data: users, error: usersError } = await supabase
       .from('profiles')
-      .select('id, email')
+      .select('id, email, semester_start, semester_end')
       .not('email', 'is', null);
 
     if (usersError || !users) {
@@ -179,6 +191,16 @@ export const checkAndSendDailySchedule = async () => {
 
       (rutinRes || []).forEach(r => {
         if (skippedRutinIds.has(r.id)) return;
+        if (user.semester_start && user.semester_end) {
+          if (isoDateStr < user.semester_start || isoDateStr > user.semester_end) {
+            return;
+          }
+          const semStart = new Date(user.semester_start);
+          const weekNum = Math.floor((new Date(isoDateStr).getTime() - semStart.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+          if (weekNum > (r.batas_minggu_berulang || 16)) {
+            return;
+          }
+        }
         scheduleItems.push({
           judul: r.judul,
           kategori: r.kategori?.nama_kategori || '-',

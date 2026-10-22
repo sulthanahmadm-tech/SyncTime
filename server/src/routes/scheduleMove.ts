@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { supabase } from '../db/connection';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
+import { checkConflicts } from '../utils/conflictChecker';
 
 const router = Router();
 
 router.put('/move', async (req: AuthenticatedRequest, res, next) => {
   const { id, type, newDate, newStartTime, newEndTime, newStartIso, newEndIso, isTemporary } = req.body;
+  const force = req.query.force || req.body.force;
 
   if (!id || !type || !newDate || !newStartTime || !newEndTime) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -15,6 +17,16 @@ router.put('/move', async (req: AuthenticatedRequest, res, next) => {
     const userId = req.user!.id;
 
     if (type === 'dinamis') {
+      const start = new Date(newStartIso);
+      const end = new Date(newEndIso);
+
+      if (force !== 'true' && force !== true) {
+        const check = await checkConflicts(userId, { start, end, excludeId: Number(id), excludeType: 'dinamis' });
+        if (check.hasConflict) {
+          return res.status(409).json(check);
+        }
+      }
+
       const { error } = await supabase
         .from('kegiatan_dinamis')
         .update({ waktu_mulai: newStartIso, waktu_selesai: newEndIso })
@@ -28,12 +40,22 @@ router.put('/move', async (req: AuthenticatedRequest, res, next) => {
     if (type === 'rutin') {
       if (!isTemporary) {
         // Permanent move
-        const dateObj = new Date(newDate);
-        let hariMingguan = dateObj.getDay();
-        if (hariMingguan === 0) hariMingguan = 7;
+        const [y, m, d] = newDate.split('-').map(Number);
+        const dateObj = new Date(y, m - 1, d);
+        let hariMingguan = dateObj.getDay() === 0 ? 7 : dateObj.getDay();
 
         const jamMulai = newStartTime.includes('T') ? newStartTime.split('T')[1].substring(0, 8) : newStartTime.substring(0, 8);
         const jamSelesai = newEndTime.includes('T') ? newEndTime.split('T')[1].substring(0, 8) : newEndTime.substring(0, 8);
+
+        const start = new Date(newStartIso || `${newDate}T${jamMulai}`);
+        const end = new Date(newEndIso || `${newDate}T${jamSelesai}`);
+
+        if (force !== 'true' && force !== true) {
+          const check = await checkConflicts(userId, { start, end, excludeId: Number(id), excludeType: 'rutin' });
+          if (check.hasConflict) {
+            return res.status(409).json(check);
+          }
+        }
 
         const { error } = await supabase
           .from('kegiatan_rutin')
@@ -48,6 +70,16 @@ router.put('/move', async (req: AuthenticatedRequest, res, next) => {
         const { originalDate } = req.body;
         if (!originalDate) {
           return res.status(400).json({ error: 'originalDate is required for temporary move' });
+        }
+
+        const start = new Date(newStartIso);
+        const end = new Date(newEndIso);
+
+        if (force !== 'true' && force !== true) {
+          const check = await checkConflicts(userId, { start, end });
+          if (check.hasConflict) {
+            return res.status(409).json(check);
+          }
         }
 
         // Get the original rutin event

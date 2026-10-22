@@ -3,7 +3,7 @@ import { useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import type { CalendarBlock } from '../lib/types';
 import { moveSchedule } from '../lib/api';
-import { isPastDate } from '../lib/utils';
+import { isPastDate, parseLocalDate } from '../lib/utils';
 
 export const useDragAndDrop = (blocks: CalendarBlock[], refetch: () => void) => {
   const [activeBlock, setActiveBlock] = useState<CalendarBlock | null>(null);
@@ -18,7 +18,7 @@ export const useDragAndDrop = (blocks: CalendarBlock[], refetch: () => void) => 
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    const block = blocks.find(b => b.id.toString() === active.id) || null;
+    const block = (active.data.current as CalendarBlock) || blocks.find(b => `${b.type}-${b.id}` === active.id) || null;
     setActiveBlock(block);
   };
 
@@ -48,7 +48,7 @@ export const useDragAndDrop = (blocks: CalendarBlock[], refetch: () => void) => 
     
     if (!over || active.id === over.id) return;
     
-    const block = blocks.find(b => b.id.toString() === active.id);
+    const block = (active.data.current as CalendarBlock) || blocks.find(b => `${b.type}-${b.id}` === active.id);
     if (!block) return;
 
     const dropDate = over.id as string;
@@ -59,7 +59,7 @@ export const useDragAndDrop = (blocks: CalendarBlock[], refetch: () => void) => 
     }
     
     const startDate = new Date(block.start);
-    const dropDayDate = new Date(dropDate);
+    const dropDayDate = parseLocalDate(dropDate);
     
     startDate.setFullYear(dropDayDate.getFullYear(), dropDayDate.getMonth(), dropDayDate.getDate());
     

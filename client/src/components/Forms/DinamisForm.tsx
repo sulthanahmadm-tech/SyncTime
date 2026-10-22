@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Kategori, KegiatanDinamis } from '../../lib/types';
-import { createDinamis, updateDinamis, createKategori } from '../../lib/api';
+import { createDinamis, updateDinamis, createKategori, deleteKegiatanDinamis } from '../../lib/api';
 import { isPastDate } from '../../lib/utils';
 
 interface DinamisFormProps {
@@ -38,10 +38,10 @@ export const DinamisForm = ({ isOpen, onClose, onSaved, kategoriList, onKategori
     if (isOpen) {
       if (editData) {
         setFormData({
-          judul: editData.judul,
-          kategori_id: editData.kategori_id.toString(),
-          waktu_mulai: toDatetimeLocal(editData.waktu_mulai),
-          waktu_selesai: toDatetimeLocal(editData.waktu_selesai)
+          judul: editData.judul || '',
+          kategori_id: (editData.kategori_id || '').toString(),
+          waktu_mulai: toDatetimeLocal((editData as any).waktu_mulai || (editData as any).start || ''),
+          waktu_selesai: toDatetimeLocal((editData as any).waktu_selesai || (editData as any).end || '')
         });
       } else {
         setFormData({
@@ -103,8 +103,13 @@ export const DinamisForm = ({ isOpen, onClose, onSaved, kategoriList, onKategori
     }
     
     const dateStr = formData.waktu_mulai.split('T')[0];
-    if (isPastDate(dateStr)) {
-      alert('Peringatan: Tidak bisa menambahkan atau menyimpan jadwal ke hari yang sudah berlalu.');
+    if (!editData && isPastDate(dateStr)) {
+      alert('Peringatan: Tidak bisa menambahkan jadwal ke hari yang sudah berlalu.');
+      return;
+    }
+
+    if (new Date(formData.waktu_selesai).getTime() <= new Date(formData.waktu_mulai).getTime()) {
+      alert('Waktu selesai harus lebih akhir dari waktu mulai');
       return;
     }
 
@@ -129,6 +134,19 @@ export const DinamisForm = ({ isOpen, onClose, onSaved, kategoriList, onKategori
       } else {
         console.error(error);
         alert(error.message);
+      }
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!editData) return;
+    if (window.confirm('Apakah Anda yakin ingin menghapus jadwal ini?')) {
+      try {
+        await deleteKegiatanDinamis(editData.id);
+        onSaved();
+        onClose();
+      } catch (err: any) {
+        alert('Gagal menghapus jadwal: ' + err.message);
       }
     }
   };
@@ -160,7 +178,7 @@ export const DinamisForm = ({ isOpen, onClose, onSaved, kategoriList, onKategori
               <div className="flex gap-2">
                 <input required autoFocus type="text" placeholder="Nama Kategori" value={newKategori.nama} onChange={e => setNewKategori({...newKategori, nama: e.target.value})} className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 outline-none" />
                 <input type="color" value={newKategori.warna} onChange={e => setNewKategori({...newKategori, warna: e.target.value})} className="w-10 h-10 rounded cursor-pointer border-0 bg-transparent p-0" title="Warna Kategori" />
-                <button type="button" onClick={handleCreateKategori} className="bg-emerald-600 dark:bg-indigo-600 px-3 min-h-[44px] rounded-lg text-sm hover:bg-emerald-700 dark:bg-indigo-700 transition font-medium cursor-pointer">Simpan</button>
+                <button type="button" onClick={handleCreateKategori} className="bg-emerald-600 dark:bg-indigo-600 px-3 min-h-[44px] rounded-lg text-sm hover:bg-emerald-700 dark:bg-indigo-700 transition font-medium cursor-pointer text-white">Simpan</button>
                 <button type="button" onClick={() => setIsAddingKategori(false)} className="bg-gray-200 dark:bg-gray-700 px-3 min-h-[44px] rounded-lg text-sm hover:bg-gray-600 transition font-medium cursor-pointer">Batal</button>
               </div>
             )}
@@ -173,9 +191,20 @@ export const DinamisForm = ({ isOpen, onClose, onSaved, kategoriList, onKategori
             <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Tanggal & Jam Selesai</label>
             <input required type="datetime-local" value={formData.waktu_selesai} onChange={e => setFormData({...formData, waktu_selesai: e.target.value})} className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 outline-none" />
           </div>
-          <div className="flex justify-end gap-3 mt-4">
-            <button type="button" onClick={onClose} className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:bg-gray-700 active:bg-gray-600 text-gray-900 dark:text-white transition cursor-pointer flex items-center justify-center">Batal</button>
-            <button type="submit" className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 active:bg-indigo-800 text-gray-900 dark:text-white transition cursor-pointer flex items-center justify-center">Simpan</button>
+          <div className="flex justify-between items-center gap-3 mt-4">
+            {editData ? (
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 active:bg-red-800 text-white transition cursor-pointer flex items-center justify-center"
+              >
+                Hapus
+              </button>
+            ) : <div />}
+            <div className="flex gap-3">
+              <button type="button" onClick={onClose} className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:bg-gray-700 active:bg-gray-600 text-gray-900 dark:text-white transition cursor-pointer flex items-center justify-center">Batal</button>
+              <button type="submit" className="px-4 py-2 min-h-[44px] min-w-[80px] rounded-lg text-sm font-medium bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 active:bg-indigo-800 text-white transition cursor-pointer flex items-center justify-center">Simpan</button>
+            </div>
           </div>
         </form>
       </div>
