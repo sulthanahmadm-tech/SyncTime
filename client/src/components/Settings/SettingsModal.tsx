@@ -25,13 +25,27 @@ export const SettingsModal = ({ isOpen, onClose, onEditRutin, onEditDinamis, onR
   // Kategori Form State
   const [editingKat, setEditingKat] = useState<Kategori | null>(null);
   const [katName, setKatName] = useState('');
-  const [katColor, setKatColor] = useState('#10b981');
+  const [katColor, setKatColor] = useState('#007AFF');
 
   useEffect(() => {
     if (isOpen) {
       fetchData();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -61,7 +75,7 @@ export const SettingsModal = ({ isOpen, onClose, onEditRutin, onEditDinamis, onR
       }
       setEditingKat(null);
       setKatName('');
-      setKatColor('#10b981');
+      setKatColor('#007AFF');
       await fetchData();
       onRefresh();
     } catch (error) {
@@ -107,62 +121,70 @@ export const SettingsModal = ({ isOpen, onClose, onEditRutin, onEditDinamis, onR
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col md:flex-row overflow-hidden border border-gray-200 dark:border-gray-800 transition-colors duration-200">
+    <div 
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm"
+      onClick={onClose}
+      data-testid="settings-modal-backdrop"
+    >
+      <div 
+        className="bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-2xl rounded-[22px] apple-squircle shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col md:flex-row overflow-hidden border border-black/[0.08] dark:border-white/[0.12] transition-colors duration-200"
+        onClick={e => e.stopPropagation()}
+        data-testid="settings-modal-card"
+      >
         
         {/* Sidebar Tabs */}
-        <div className="w-full md:w-64 bg-gray-50 dark:bg-gray-950 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-800 p-3 md:p-4 flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-x-visible shrink-0 transition-colors duration-200">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1 md:mb-6 px-2 flex items-center gap-2 shrink-0">
-            <Settings className="w-5 h-5" /> Settings
+        <div className="w-full md:w-64 bg-[#F5F5F7]/90 dark:bg-[#151517]/90 border-b md:border-b-0 md:border-r border-black/[0.06] dark:border-white/[0.08] p-3 md:p-4 flex flex-row md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible shrink-0 transition-colors duration-200">
+          <h2 className="text-lg font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7] mb-1 md:mb-5 px-2.5 flex items-center gap-2 shrink-0">
+            <Settings className="w-5 h-5 text-[#007AFF] dark:text-[#0A84FF]" /> Settings
           </h2>
           
-          <button onClick={() => setActiveTab('general')} className={`flex items-center gap-3 px-4 py-2.5 md:py-3 rounded-lg font-medium whitespace-nowrap transition-colors ${activeTab === 'general' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800'}`}>
+          <button onClick={() => setActiveTab('general')} className={`flex items-center gap-3 px-3.5 py-2 md:py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${activeTab === 'general' ? 'bg-[#007AFF] dark:bg-[#0A84FF] text-white shadow-xs' : 'text-[#1D1D1F] hover:bg-black/[0.05] dark:text-[#EBEBF5] dark:hover:bg-white/[0.06]'}`}>
             <Settings className="w-4 h-4" /> General
           </button>
           
-          <button onClick={() => setActiveTab('kategori')} className={`flex items-center gap-3 px-4 py-2.5 md:py-3 rounded-lg font-medium whitespace-nowrap transition-colors ${activeTab === 'kategori' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800'}`}>
+          <button onClick={() => setActiveTab('kategori')} className={`flex items-center gap-3 px-3.5 py-2 md:py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${activeTab === 'kategori' ? 'bg-[#007AFF] dark:bg-[#0A84FF] text-white shadow-xs' : 'text-[#1D1D1F] hover:bg-black/[0.05] dark:text-[#EBEBF5] dark:hover:bg-white/[0.06]'}`}>
             <Tag className="w-4 h-4" /> Kategori
           </button>
           
-          <button onClick={() => setActiveTab('rutin')} className={`flex items-center gap-3 px-4 py-2.5 md:py-3 rounded-lg font-medium whitespace-nowrap transition-colors ${activeTab === 'rutin' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800'}`}>
+          <button onClick={() => setActiveTab('rutin')} className={`flex items-center gap-3 px-3.5 py-2 md:py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${activeTab === 'rutin' ? 'bg-[#007AFF] dark:bg-[#0A84FF] text-white shadow-xs' : 'text-[#1D1D1F] hover:bg-black/[0.05] dark:text-[#EBEBF5] dark:hover:bg-white/[0.06]'}`}>
             <Clock className="w-4 h-4" /> Jadwal Rutin
           </button>
 
-          <button onClick={() => setActiveTab('dinamis')} className={`flex items-center gap-3 px-4 py-2.5 md:py-3 rounded-lg font-medium whitespace-nowrap transition-colors ${activeTab === 'dinamis' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800'}`}>
+          <button onClick={() => setActiveTab('dinamis')} className={`flex items-center gap-3 px-3.5 py-2 md:py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${activeTab === 'dinamis' ? 'bg-[#007AFF] dark:bg-[#0A84FF] text-white shadow-xs' : 'text-[#1D1D1F] hover:bg-black/[0.05] dark:text-[#EBEBF5] dark:hover:bg-white/[0.06]'}`}>
             <Clock className="w-4 h-4" /> Jadwal Dinamis
           </button>
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-900 transition-colors duration-200">
-          <div className="h-16 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 shrink-0">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white capitalize">{activeTab} Settings</h3>
-            <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+        <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-[#1C1C1E] transition-colors duration-200">
+          <div className="h-14 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between px-6 shrink-0">
+            <h3 className="text-base font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7] capitalize">{activeTab} Settings</h3>
+            <button onClick={onClose} className="p-2 text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#8E8E93] dark:hover:text-[#F5F5F7] rounded-full hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition cursor-pointer">
               <X className="w-5 h-5" />
             </button>
           </div>
           
           <div className="flex-1 overflow-y-auto p-6 relative">
-            {loading && <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/50 flex items-center justify-center z-10">Loading...</div>}
+            {loading && <div className="absolute inset-0 bg-white/50 dark:bg-[#1C1C1E]/50 flex items-center justify-center z-10 text-sm text-[#6E6E73]">Loading...</div>}
             
             {activeTab === 'general' && (
               <div className="max-w-xl">
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 uppercase tracking-wider">Appearance</h4>
+                <h4 className="text-xs font-semibold text-[#6E6E73] dark:text-[#8E8E93] mb-3 uppercase tracking-wider">Appearance</h4>
                 
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between p-4 bg-[#F2F2F7] dark:bg-[#2C2C2E] rounded-2xl border border-black/[0.05] dark:border-white/[0.06]">
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white">Theme Preference</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Choose your preferred lighting</p>
+                    <p className="font-medium text-sm text-[#1D1D1F] dark:text-[#F5F5F7]">Theme Preference</p>
+                    <p className="text-xs text-[#6E6E73] dark:text-[#8E8E93] mt-0.5">Choose your preferred lighting</p>
                   </div>
                   
-                  <div className="flex bg-gray-200 dark:bg-gray-950 p-1 rounded-lg gap-1">
-                    <button onClick={() => setTheme('light')} className={`p-2 rounded-md transition-all ${theme === 'light' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`} title="Light">
+                  <div className="flex bg-black/[0.06] dark:bg-black/40 p-1 rounded-xl gap-1">
+                    <button onClick={() => setTheme('light')} className={`p-2 rounded-lg transition-all cursor-pointer ${theme === 'light' ? 'bg-white shadow-xs text-[#007AFF]' : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#8E8E93] dark:hover:text-[#F5F5F7]'}`} title="Light">
                       <Sun className="w-4 h-4" />
                     </button>
-                    <button onClick={() => setTheme('dark')} className={`p-2 rounded-md transition-all ${theme === 'dark' ? 'bg-gray-800 shadow-sm text-emerald-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`} title="Dark">
+                    <button onClick={() => setTheme('dark')} className={`p-2 rounded-lg transition-all cursor-pointer ${theme === 'dark' ? 'bg-[#3A3A3C] shadow-xs text-[#0A84FF]' : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#8E8E93] dark:hover:text-[#F5F5F7]'}`} title="Dark">
                       <Moon className="w-4 h-4" />
                     </button>
-                    <button onClick={() => setTheme('system')} className={`p-2 rounded-md transition-all ${theme === 'system' ? 'bg-gray-100 dark:bg-gray-800 shadow-sm text-emerald-500 dark:text-emerald-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`} title="System">
+                    <button onClick={() => setTheme('system')} className={`p-2 rounded-lg transition-all cursor-pointer ${theme === 'system' ? 'bg-white dark:bg-[#3A3A3C] shadow-xs text-[#007AFF] dark:text-[#0A84FF]' : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#8E8E93] dark:hover:text-[#F5F5F7]'}`} title="System">
                       <Monitor className="w-4 h-4" />
                     </button>
                   </div>
@@ -172,20 +194,20 @@ export const SettingsModal = ({ isOpen, onClose, onEditRutin, onEditDinamis, onR
             
             {activeTab === 'kategori' && (
               <div className="max-w-3xl flex flex-col gap-6">
-                <form onSubmit={handleSaveKategori} className="flex gap-4 items-end bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Kategori</label>
-                    <input type="text" required value={katName} onChange={e => setKatName(e.target.value)} className="w-full px-3 py-2 bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:ring-emerald-500" placeholder="Contoh: Kuliah" />
+                <form onSubmit={handleSaveKategori} className="flex flex-wrap gap-3 items-end bg-[#F2F2F7] dark:bg-[#2C2C2E] p-4 rounded-2xl border border-black/[0.05] dark:border-white/[0.06]">
+                  <div className="flex-1 min-w-[180px]">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#8E8E93] mb-1.5">Nama Kategori</label>
+                    <input type="text" required value={katName} onChange={e => setKatName(e.target.value)} className="w-full px-3.5 py-2 bg-white dark:bg-[#1C1C1E] border border-black/[0.08] dark:border-white/[0.12] rounded-xl text-sm text-[#1D1D1F] dark:text-[#F5F5F7] focus:ring-2 focus:ring-[#007AFF]/20 outline-none" placeholder="Contoh: Kuliah" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Warna</label>
-                    <input type="color" value={katColor} onChange={e => setKatColor(e.target.value)} className="h-10 w-14 rounded cursor-pointer" />
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#8E8E93] mb-1.5">Warna</label>
+                    <input type="color" value={katColor} onChange={e => setKatColor(e.target.value)} className="h-9 w-12 rounded-lg cursor-pointer border-0 bg-transparent" />
                   </div>
-                  <button type="submit" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition flex items-center gap-2">
+                  <button type="submit" className="px-4 py-2 bg-[#007AFF] dark:bg-[#0A84FF] hover:bg-[#0062CC] dark:hover:bg-[#0070E0] text-white rounded-xl text-sm font-semibold transition flex items-center gap-1.5 cursor-pointer">
                     {editingKat ? <><Edit2 className="w-4 h-4"/> Update</> : <><Plus className="w-4 h-4"/> Tambah</>}
                   </button>
                   {editingKat && (
-                    <button type="button" onClick={() => {setEditingKat(null); setKatName(''); setKatColor('#10b981');}} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-lg font-medium transition">
+                    <button type="button" onClick={() => {setEditingKat(null); setKatName(''); setKatColor('#007AFF');}} className="px-4 py-2 bg-black/[0.06] dark:bg-white/[0.1] hover:bg-black/[0.1] text-[#1D1D1F] dark:text-[#F5F5F7] rounded-xl text-sm font-medium transition cursor-pointer">
                       Batal
                     </button>
                   )}
@@ -193,14 +215,14 @@ export const SettingsModal = ({ isOpen, onClose, onEditRutin, onEditDinamis, onR
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {kategoriList.map(k => (
-                    <div key={k.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-950">
+                    <div key={k.id} className="flex items-center justify-between p-3.5 border border-black/[0.06] dark:border-white/[0.08] rounded-2xl bg-[#F2F2F7]/60 dark:bg-[#2C2C2E]/60">
                       <div className="flex items-center gap-3">
-                        <span className="w-4 h-4 rounded-full" style={{ backgroundColor: k.warna_hex }}></span>
-                        <span className="font-medium text-gray-900 dark:text-white">{k.nama_kategori}</span>
+                        <span className="w-3.5 h-3.5 rounded-full shadow-xs" style={{ backgroundColor: k.warna_hex }}></span>
+                        <span className="font-medium text-sm text-[#1D1D1F] dark:text-[#F5F5F7]">{k.nama_kategori}</span>
                       </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => { setEditingKat(k); setKatName(k.nama_kategori); setKatColor(k.warna_hex); }} className="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded"><Edit2 className="w-4 h-4"/></button>
-                        <button onClick={() => handleDeleteKat(k.id)} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"><Trash2 className="w-4 h-4"/></button>
+                      <div className="flex gap-1.5">
+                        <button onClick={() => { setEditingKat(k); setKatName(k.nama_kategori); setKatColor(k.warna_hex); }} className="p-1.5 text-[#007AFF] dark:text-[#0A84FF] hover:bg-[#007AFF]/10 rounded-lg cursor-pointer"><Edit2 className="w-4 h-4"/></button>
+                        <button onClick={() => handleDeleteKat(k.id)} className="p-1.5 text-[#FF3B30] dark:text-[#FF453A] hover:bg-[#FF3B30]/10 rounded-lg cursor-pointer"><Trash2 className="w-4 h-4"/></button>
                       </div>
                     </div>
                   ))}
@@ -209,45 +231,45 @@ export const SettingsModal = ({ isOpen, onClose, onEditRutin, onEditDinamis, onR
             )}
             
             {activeTab === 'rutin' && (
-              <div className="max-w-4xl flex flex-col gap-4">
+              <div className="max-w-4xl flex flex-col gap-3">
                 {rutinList.map(r => (
-                  <div key={r.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-950 hover:border-emerald-500 transition">
+                  <div key={r.id} className="flex items-center justify-between p-4 border border-black/[0.06] dark:border-white/[0.08] rounded-2xl bg-[#F2F2F7]/60 dark:bg-[#2C2C2E]/60 hover:border-[#007AFF]/40 transition">
                     <div>
-                      <h4 className="font-bold text-gray-900 dark:text-white">{r.judul}</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Setiap {HARI[r.hari_mingguan === 7 ? 0 : r.hari_mingguan]} • {r.jam_mulai.substring(0, 5)} - {r.jam_selesai.substring(0, 5)}</p>
+                      <h4 className="font-semibold text-sm text-[#1D1D1F] dark:text-[#F5F5F7]">{r.judul}</h4>
+                      <p className="text-xs text-[#6E6E73] dark:text-[#8E8E93] mt-0.5 tabular-nums">Setiap {HARI[r.hari_mingguan === 7 ? 0 : r.hari_mingguan]} • {r.jam_mulai.substring(0, 5)} - {r.jam_selesai.substring(0, 5)}</p>
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => { onClose(); onEditRutin(r); }} className="px-3 py-1.5 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition">Edit</button>
-                      <button onClick={() => handleDeleteRutin(r.id)} className="px-3 py-1.5 text-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-medium hover:bg-red-200 dark:hover:bg-red-900/50 transition">Hapus</button>
+                      <button onClick={() => { onClose(); onEditRutin(r); }} className="px-3 py-1.5 text-xs bg-[#007AFF]/10 text-[#007AFF] dark:text-[#0A84FF] rounded-xl font-medium hover:bg-[#007AFF]/20 transition cursor-pointer">Edit</button>
+                      <button onClick={() => handleDeleteRutin(r.id)} className="px-3 py-1.5 text-xs bg-[#FF3B30]/10 text-[#FF3B30] dark:text-[#FF453A] rounded-xl font-medium hover:bg-[#FF3B30]/20 transition cursor-pointer">Hapus</button>
                     </div>
                   </div>
                 ))}
-                {rutinList.length === 0 && <p className="text-gray-500 text-center py-8">Belum ada jadwal rutin</p>}
+                {rutinList.length === 0 && <p className="text-[#8E8E93] text-sm text-center py-8">Belum ada jadwal rutin</p>}
               </div>
             )}
 
             {activeTab === 'dinamis' && (
-              <div className="max-w-4xl flex flex-col gap-4">
+              <div className="max-w-4xl flex flex-col gap-3">
                 {dinamisList.map(d => {
                   const start = new Date(d.waktu_mulai);
                   return (
-                    <div key={d.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-950 hover:border-emerald-500 transition">
+                    <div key={d.id} className="flex items-center justify-between p-4 border border-black/[0.06] dark:border-white/[0.08] rounded-2xl bg-[#F2F2F7]/60 dark:bg-[#2C2C2E]/60 hover:border-[#007AFF]/40 transition">
                       <div>
-                        <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                          {d.judul} {d.is_completed && <span className="bg-emerald-100 text-emerald-700 text-xs px-2 py-0.5 rounded-full">Selesai</span>}
+                        <h4 className="font-semibold text-sm text-[#1D1D1F] dark:text-[#F5F5F7] flex items-center gap-2">
+                          {d.judul} {d.is_completed && <span className="bg-[#34C759]/15 text-[#34C759] text-[11px] px-2 py-0.5 rounded-full font-medium">Selesai</span>}
                         </h4>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <p className="text-xs text-[#6E6E73] dark:text-[#8E8E93] mt-0.5 tabular-nums">
                           {start.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })} • {formatTime(d.waktu_mulai)} - {formatTime(d.waktu_selesai)}
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={() => { onClose(); onEditDinamis(d); }} className="px-3 py-1.5 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition">Edit</button>
-                        <button onClick={() => handleDeleteDinamis(d.id)} className="px-3 py-1.5 text-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-medium hover:bg-red-200 dark:hover:bg-red-900/50 transition">Hapus</button>
+                        <button onClick={() => { onClose(); onEditDinamis(d); }} className="px-3 py-1.5 text-xs bg-[#007AFF]/10 text-[#007AFF] dark:text-[#0A84FF] rounded-xl font-medium hover:bg-[#007AFF]/20 transition cursor-pointer">Edit</button>
+                        <button onClick={() => handleDeleteDinamis(d.id)} className="px-3 py-1.5 text-xs bg-[#FF3B30]/10 text-[#FF3B30] dark:text-[#FF453A] rounded-xl font-medium hover:bg-[#FF3B30]/20 transition cursor-pointer">Hapus</button>
                       </div>
                     </div>
                   )
                 })}
-                {dinamisList.length === 0 && <p className="text-gray-500 text-center py-8">Belum ada jadwal dinamis</p>}
+                {dinamisList.length === 0 && <p className="text-[#8E8E93] text-sm text-center py-8">Belum ada jadwal dinamis</p>}
               </div>
             )}
           </div>

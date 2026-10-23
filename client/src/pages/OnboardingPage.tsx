@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Calendar, BookOpen, CheckCircle2, Trash2, Plus, ArrowRight, ArrowLeft, Info } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 import { setSemester, addMatkulBulk, completeOnboarding } from '../lib/api';
@@ -148,82 +149,110 @@ const OnboardingPage: React.FC = () => {
     }
   };
 
+  const inputClass =
+    'w-full px-3.5 py-2.5 rounded-[12px] bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/[0.06] dark:border-white/[0.08] text-[15px] text-[#1D1D1F] dark:text-white focus:bg-white dark:focus:bg-[#1C1C1E] focus:ring-2 focus:ring-[#007AFF]/25 focus:border-[#007AFF] dark:focus:border-[#0A84FF] outline-none transition-all';
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
-      <div className="bg-white/95 backdrop-blur-sm shadow-2xl rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col transition-all duration-300">
-        
+    <div className="min-h-screen bg-[#F5F5F7] dark:bg-black text-[#1D1D1F] dark:text-[#F5F5F7] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 opacity-60 dark:opacity-40"
+        style={{
+          background: 'radial-gradient(circle at 50% 0%, rgba(0, 122, 255, 0.10) 0%, transparent 65%)'
+        }}
+      />
+
+      <div
+        className="relative bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-2xl backdrop-saturate-150 border border-black/[0.08] dark:border-white/[0.10] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.65)] rounded-[24px] w-full max-w-xl overflow-hidden flex flex-col transition-all duration-300"
+        style={{
+          borderRadius: '24px',
+          WebkitBorderRadius: '24px',
+        }}
+      >
         {/* Header & Step Indicator */}
-        <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-white">
-          <div className="flex gap-2">
+        <div className="px-6 sm:px-8 py-5 border-b border-black/[0.06] dark:border-white/[0.08] flex justify-between items-center bg-white/60 dark:bg-[#1C1C1E]/60">
+          <div className="flex items-center gap-2">
             {[1, 2, 3].map((s) => (
               <div 
                 key={s} 
-                className={`h-2.5 rounded-full transition-all duration-300 ${s === step ? 'w-8 bg-emerald-600 dark:bg-indigo-600' : s < step ? 'w-4 bg-indigo-300' : 'w-4 bg-gray-200'}`}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  s === step
+                    ? 'w-8 bg-[#007AFF] dark:bg-[#0A84FF]'
+                    : s < step
+                      ? 'w-3 bg-[#007AFF]/40 dark:bg-[#0A84FF]/40'
+                      : 'w-3 bg-black/10 dark:bg-white/15'
+                }`}
               />
             ))}
+            <span className="ml-2 text-xs font-medium text-[#6E6E73] dark:text-[#98989D] tabular-nums">
+              Langkah {step} dari 3
+            </span>
           </div>
           <button 
             onClick={handleSkip}
             disabled={loading}
-            className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors"
+            className="text-xs font-semibold text-[#007AFF] dark:text-[#0A84FF] hover:opacity-80 transition-opacity cursor-pointer"
           >
             Lewati
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-8">
+        <div className="p-6 sm:p-8">
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+            <div className="mb-6 p-3.5 bg-[#FF3B30]/10 border border-[#FF3B30]/20 text-[#D70015] dark:text-[#FF453A] rounded-[12px] text-xs font-medium">
               {error}
             </div>
           )}
 
           {/* STEP 1 */}
           {step === 1 && (
-            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-              <div className="mb-8 text-center">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Atur Periode Semester</h1>
-                <p className="text-gray-500">Tentukan kapan semester kamu dimulai dan berakhir</p>
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="mb-7 text-center">
+                <div className="w-12 h-12 rounded-[14px] bg-[#007AFF]/10 dark:bg-[#0A84FF]/15 text-[#007AFF] dark:text-[#0A84FF] flex items-center justify-center mx-auto mb-3.5">
+                  <Calendar className="w-6 h-6 stroke-[1.8]" />
+                </div>
+                <h1 className="text-2xl font-semibold tracking-tight text-[#1D1D1F] dark:text-white mb-1.5">Atur Periode Semester</h1>
+                <p className="text-sm text-[#6E6E73] dark:text-[#98989D]">Tentukan rentang tanggal mulai dan berakhirnya semester ini</p>
               </div>
 
-              <form onSubmit={handleStep1Submit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Tanggal Mulai Semester</label>
+              <form onSubmit={handleStep1Submit} className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">Tanggal Mulai Semester</label>
                     <input 
                       type="date"
                       value={semesterStart}
                       onChange={(e) => setSemesterStart(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 focus:border-emerald-500 dark:border-indigo-500 transition-colors"
+                      className={`${inputClass} tabular-nums`}
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Tanggal Selesai Semester</label>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">Tanggal Selesai Semester</label>
                     <input 
                       type="date"
                       value={semesterEnd}
                       onChange={(e) => setSemesterEnd(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 focus:border-emerald-500 dark:border-indigo-500 transition-colors"
+                      className={`${inputClass} tabular-nums`}
                       required
                     />
                   </div>
                 </div>
 
-                <div className="bg-indigo-50 text-indigo-700 p-4 rounded-lg flex gap-3 text-sm">
-                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
-                  <p>Matkul wajib akan berulang setiap minggu selama periode ini (maks. 16 minggu)</p>
+                <div className="bg-[#007AFF]/[0.08] dark:bg-[#0A84FF]/[0.12] text-[#0062CC] dark:text-[#64D2FF] p-3.5 rounded-[12px] flex items-start gap-3 text-xs leading-relaxed">
+                  <Info className="w-4 h-4 shrink-0 mt-0.5" />
+                  <p>Jadwal mata kuliah wajib akan diulang otomatis setiap minggu selama periode semester ini.</p>
                 </div>
 
-                <div className="pt-4 flex justify-end">
+                <div className="pt-3 flex justify-end">
                   <button 
                     type="submit"
                     disabled={loading}
-                    className="bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 text-gray-900 dark:text-white font-medium py-3 px-8 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-70"
+                    className="min-h-[44px] bg-[#007AFF] hover:bg-[#0062CC] dark:bg-[#0A84FF] dark:hover:bg-[#0070E0] text-white font-semibold text-sm py-2.5 px-6 rounded-[12px] transition-all flex items-center gap-2 disabled:opacity-60 cursor-pointer"
                   >
-                    {loading ? 'Menyimpan...' : 'Lanjut'}
-                    {!loading && <span>&rarr;</span>}
+                    <span>{loading ? 'Menyimpan...' : 'Lanjut'}</span>
+                    {!loading && <ArrowRight className="w-4 h-4" />}
                   </button>
                 </div>
               </form>
@@ -232,68 +261,72 @@ const OnboardingPage: React.FC = () => {
 
           {/* STEP 2 */}
           {step === 2 && (
-            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-              <div className="mb-8 text-center">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Tambah Matkul Wajib</h1>
-                <p className="text-gray-500">Masukkan jadwal kuliah rutinmu</p>
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="mb-6 text-center">
+                <div className="w-12 h-12 rounded-[14px] bg-[#007AFF]/10 dark:bg-[#0A84FF]/15 text-[#007AFF] dark:text-[#0A84FF] flex items-center justify-center mx-auto mb-3.5">
+                  <BookOpen className="w-6 h-6 stroke-[1.8]" />
+                </div>
+                <h1 className="text-2xl font-semibold tracking-tight text-[#1D1D1F] dark:text-white mb-1.5">Tambah Matkul Wajib</h1>
+                <p className="text-sm text-[#6E6E73] dark:text-[#98989D]">Masukkan jadwal perkuliahan mingguanmu</p>
               </div>
 
               {/* Matkul List */}
               {matkulList.length > 0 ? (
-                <div className="mb-6 space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                <div className="mb-5 space-y-2.5 max-h-56 overflow-y-auto pr-1">
                   {matkulList.map((m, idx) => (
-                    <div key={idx} className="flex justify-between items-center p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div key={idx} className="flex justify-between items-center p-3.5 bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/[0.05] dark:border-white/[0.06] rounded-[14px]">
                       <div>
-                        <h4 className="font-semibold text-gray-800">{m.judul}</h4>
-                        <p className="text-sm text-gray-500">
-                          {DAY_MAP[m.hari_mingguan]}, {m.jam_mulai.substring(0, 5)} - {m.jam_selesai.substring(0, 5)}
+                        <h4 className="font-semibold text-sm text-[#1D1D1F] dark:text-white">{m.judul}</h4>
+                        <p className="text-xs text-[#6E6E73] dark:text-[#98989D] tabular-nums mt-0.5">
+                          {DAY_MAP[m.hari_mingguan]} • {m.jam_mulai.substring(0, 5)} – {m.jam_selesai.substring(0, 5)}
                         </p>
                       </div>
                       <button 
                         onClick={() => removeMatkul(idx)}
-                        className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                        className="p-2 text-[#FF3B30] hover:bg-[#FF3B30]/10 rounded-full transition-colors cursor-pointer"
                         title="Hapus"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="mb-6 p-8 text-center bg-gray-50 border border-dashed border-gray-300 rounded-lg text-gray-500">
-                  Belum ada matkul yang ditambahkan
+                <div className="mb-5 p-6 text-center bg-[#F2F2F7]/60 dark:bg-[#2C2C2E]/40 border border-dashed border-black/15 dark:border-white/15 rounded-[14px] text-xs text-[#6E6E73] dark:text-[#98989D]">
+                  Belum ada mata kuliah yang ditambahkan
                 </div>
               )}
 
               {/* Add Matkul Form */}
-              <div className="mb-8">
+              <div className="mb-6">
                 <button 
+                  type="button"
                   onClick={() => setShowMatkulForm(!showMatkulForm)}
-                  className="flex items-center gap-2 text-indigo-600 font-medium mb-4 hover:text-indigo-800 transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-[#007AFF] dark:text-[#0A84FF] font-semibold mb-3 hover:opacity-80 transition-opacity cursor-pointer"
                 >
                   {showMatkulForm ? '− Sembunyikan Form' : '+ Tambah Matkul Baru'}
                 </button>
                 
                 {showMatkulForm && (
-                  <form onSubmit={handleAddMatkul} className="bg-indigo-50/50 p-5 rounded-xl border border-indigo-100 space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <form onSubmit={handleAddMatkul} className="bg-[#F2F2F7]/60 dark:bg-[#2C2C2E]/40 p-4 rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] space-y-3.5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                       <div className="space-y-1 md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700">Nama Mata Kuliah</label>
+                        <label className="block text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">Nama Mata Kuliah</label>
                         <input 
                           type="text"
                           value={newMatkul.judul}
                           onChange={(e) => setNewMatkul({...newMatkul, judul: e.target.value})}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 focus:border-emerald-500 dark:border-indigo-500 transition-colors"
+                          className={inputClass}
                           placeholder="Misal: Algoritma dan Pemrograman"
                         />
                       </div>
                       
                       <div className="space-y-1">
-                        <label className="block text-sm font-medium text-gray-700">Hari</label>
+                        <label className="block text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">Hari</label>
                         <select 
                           value={newMatkul.hari_mingguan}
                           onChange={(e) => setNewMatkul({...newMatkul, hari_mingguan: Number(e.target.value)})}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 focus:border-emerald-500 dark:border-indigo-500 transition-colors"
+                          className={inputClass}
                         >
                           {Object.entries(DAY_MAP).map(([val, label]) => (
                             <option key={val} value={val}>{label}</option>
@@ -301,53 +334,57 @@ const OnboardingPage: React.FC = () => {
                         </select>
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-2.5">
                         <div className="space-y-1">
-                          <label className="block text-sm font-medium text-gray-700">Jam Mulai</label>
+                          <label className="block text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">Jam Mulai</label>
                           <input 
                             type="time"
                             value={newMatkul.jam_mulai}
                             onChange={(e) => setNewMatkul({...newMatkul, jam_mulai: e.target.value})}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 focus:border-emerald-500 dark:border-indigo-500 transition-colors"
+                            className={`${inputClass} tabular-nums px-2.5`}
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="block text-sm font-medium text-gray-700">Jam Selesai</label>
+                          <label className="block text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">Jam Selesai</label>
                           <input 
                             type="time"
                             value={newMatkul.jam_selesai}
                             onChange={(e) => setNewMatkul({...newMatkul, jam_selesai: e.target.value})}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 dark:ring-indigo-500 focus:border-emerald-500 dark:border-indigo-500 transition-colors"
+                            className={`${inputClass} tabular-nums px-2.5`}
                           />
                         </div>
                       </div>
                     </div>
-                    <div className="flex justify-end">
+                    <div className="flex justify-end pt-1">
                       <button 
                         type="submit"
-                        className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-medium py-2 px-6 rounded-lg transition-colors text-sm"
+                        className="bg-[#007AFF]/12 dark:bg-[#0A84FF]/20 text-[#007AFF] dark:text-[#0A84FF] hover:bg-[#007AFF]/20 font-semibold py-2 px-4 rounded-[10px] transition-colors text-xs flex items-center gap-1.5 cursor-pointer"
                       >
-                        + Tambah ke Daftar
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Tambah ke Daftar</span>
                       </button>
                     </div>
                   </form>
                 )}
               </div>
 
-              <div className="pt-4 flex justify-between items-center border-t border-gray-100">
+              <div className="pt-4 flex justify-between items-center border-t border-black/[0.06] dark:border-white/[0.08]">
                 <button 
+                  type="button"
                   onClick={() => setStep(1)}
-                  className="text-gray-500 hover:text-gray-800 font-medium px-4 py-2"
+                  className="text-sm text-[#6E6E73] dark:text-[#98989D] hover:text-[#1D1D1F] dark:hover:text-white font-medium px-3 py-2 flex items-center gap-1.5 cursor-pointer"
                 >
-                  &larr; Kembali
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Kembali</span>
                 </button>
                 <button 
+                  type="button"
                   onClick={handleStep2Submit}
                   disabled={loading}
-                  className="bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 text-gray-900 dark:text-white font-medium py-3 px-8 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-70"
+                  className="min-h-[44px] bg-[#007AFF] hover:bg-[#0062CC] dark:bg-[#0A84FF] dark:hover:bg-[#0070E0] text-white font-semibold text-sm py-2.5 px-6 rounded-[12px] transition-all flex items-center gap-2 disabled:opacity-60 cursor-pointer"
                 >
-                  {loading ? 'Menyimpan...' : 'Lanjut'}
-                  {!loading && <span>&rarr;</span>}
+                  <span>{loading ? 'Menyimpan...' : 'Lanjut'}</span>
+                  {!loading && <ArrowRight className="w-4 h-4" />}
                 </button>
               </div>
             </div>
@@ -355,29 +392,33 @@ const OnboardingPage: React.FC = () => {
 
           {/* STEP 3 */}
           {step === 3 && (
-            <div className="animate-in fade-in slide-in-from-right-4 duration-500 text-center py-8">
-              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-5xl">🎉</span>
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300 text-center py-4">
+              <div className="w-16 h-16 bg-[#34C759]/15 dark:bg-[#30D158]/20 text-[#248A3D] dark:text-[#30D158] rounded-[20px] flex items-center justify-center mx-auto mb-5">
+                <CheckCircle2 className="w-9 h-9 stroke-[2]" />
               </div>
               
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Semua Siap!</h1>
-              <p className="text-gray-500 mb-8">{matkulList.length} matkul wajib berhasil ditambahkan</p>
+              <h1 className="text-2xl font-semibold tracking-tight text-[#1D1D1F] dark:text-white mb-1.5">Semua Siap</h1>
+              <p className="text-sm text-[#6E6E73] dark:text-[#98989D] mb-6">{matkulList.length} mata kuliah wajib berhasil dijadwalkan</p>
               
-              <div className="bg-gray-50 rounded-xl p-6 mb-8 text-left border border-gray-100">
-                <h3 className="font-semibold text-gray-800 mb-4">Ringkasan Setup:</h3>
+              <div className="bg-[#F2F2F7] dark:bg-[#2C2C2E] rounded-[16px] p-5 mb-7 text-left border border-black/[0.05] dark:border-white/[0.06]">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D] mb-3.5">Ringkasan Konfigurasi</h3>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0 mt-0.5"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg></div>
+                    <div className="w-6 h-6 rounded-full bg-[#007AFF]/15 dark:bg-[#0A84FF]/20 text-[#007AFF] dark:text-[#0A84FF] flex items-center justify-center shrink-0 mt-0.5">
+                      <Calendar className="w-3.5 h-3.5" />
+                    </div>
                     <div>
-                      <p className="font-medium text-gray-800">Periode Semester</p>
-                      <p className="text-sm text-gray-500">{semesterStart} s/d {semesterEnd}</p>
+                      <p className="text-sm font-semibold text-[#1D1D1F] dark:text-white">Periode Semester</p>
+                      <p className="text-xs text-[#6E6E73] dark:text-[#98989D] tabular-nums">{semesterStart} s/d {semesterEnd}</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0 mt-0.5"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg></div>
+                    <div className="w-6 h-6 rounded-full bg-[#007AFF]/15 dark:bg-[#0A84FF]/20 text-[#007AFF] dark:text-[#0A84FF] flex items-center justify-center shrink-0 mt-0.5">
+                      <BookOpen className="w-3.5 h-3.5" />
+                    </div>
                     <div>
-                      <p className="font-medium text-gray-800">Mata Kuliah Wajib</p>
-                      <p className="text-sm text-gray-500">{matkulList.length} jadwal rutin tersimpan</p>
+                      <p className="text-sm font-semibold text-[#1D1D1F] dark:text-white">Mata Kuliah Wajib</p>
+                      <p className="text-xs text-[#6E6E73] dark:text-[#98989D]">{matkulList.length} jadwal rutin tersimpan</p>
                     </div>
                   </li>
                 </ul>
@@ -386,10 +427,10 @@ const OnboardingPage: React.FC = () => {
               <button 
                 onClick={handleStep3Submit}
                 disabled={loading}
-                className="w-full bg-emerald-600 dark:bg-indigo-600 hover:bg-emerald-700 dark:bg-indigo-700 text-gray-900 dark:text-white font-bold py-4 px-8 rounded-xl transition-colors shadow-lg shadow-indigo-200 flex justify-center items-center gap-2"
+                className="w-full min-h-[46px] bg-[#007AFF] hover:bg-[#0062CC] dark:bg-[#0A84FF] dark:hover:bg-[#0070E0] text-white font-semibold text-[15px] py-3 px-6 rounded-[12px] transition-all flex justify-center items-center gap-2 cursor-pointer"
               >
-                {loading ? 'Memproses...' : 'Masuk ke Dashboard'}
-                {!loading && <span>&rarr;</span>}
+                <span>{loading ? 'Memproses...' : 'Buka Kalender SyncTime'}</span>
+                {!loading && <ArrowRight className="w-4 h-4" />}
               </button>
             </div>
           )}
@@ -401,3 +442,4 @@ const OnboardingPage: React.FC = () => {
 };
 
 export default OnboardingPage;
+

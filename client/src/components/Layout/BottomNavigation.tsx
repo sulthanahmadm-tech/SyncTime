@@ -19,6 +19,9 @@ interface BottomNavigationProps {
   onCloseMatkulWajib?: () => void;
   onCloseForm?: () => void;
   onOpenSettings: () => void;
+  isSettingsOpen?: boolean;
+  onCloseSettings?: () => void;
+  onCloseFilter?: () => void;
   weekStart: string;
   userId?: string;
 }
@@ -32,6 +35,9 @@ export const BottomNavigation = ({
   onCloseMatkulWajib,
   onCloseForm,
   onOpenSettings,
+  isSettingsOpen = false,
+  onCloseSettings,
+  onCloseFilter,
   weekStart,
   userId,
 }: BottomNavigationProps) => {
@@ -122,7 +128,7 @@ export const BottomNavigation = ({
     }
   };
 
-  const isScheduleActive = !actionSheetOpen && !isMatkulWajibOpen;
+  const isScheduleActive = !actionSheetOpen && !isMatkulWajibOpen && !isSettingsOpen;
 
   return (
     <>
@@ -130,9 +136,9 @@ export const BottomNavigation = ({
       {showToast && (
         <div 
           data-testid="share-toast"
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 bg-white dark:bg-gray-900/90 backdrop-blur-xl backdrop-saturate-150 border border-white/20 rounded-full shadow-2xl flex items-center gap-2 text-gray-900 dark:text-white text-sm font-medium animate-in fade-in slide-in-from-top-4"
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-xl backdrop-saturate-150 border border-black/[0.08] dark:border-white/[0.12] rounded-full shadow-2xl flex items-center gap-2 text-[#1D1D1F] dark:text-white text-sm font-medium animate-in fade-in slide-in-from-top-4"
         >
-          <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-[#34C759]/20 text-[#248A3D] dark:text-[#30D158] flex items-center justify-center">
             <Check className="w-3.5 h-3.5" />
           </div>
           <span>Link jadwal berhasil disalin!</span>
@@ -142,17 +148,17 @@ export const BottomNavigation = ({
       {/* Action Sheet: Tambah Jadwal Baru (Apple HIG Action Sheet) */}
       {actionSheetOpen && (
         <div 
-          className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 flex flex-col md:hidden"
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 flex flex-col md:hidden"
           onClick={() => setActionSheetOpen(false)}
           data-testid="action-sheet-backdrop"
         >
           <div 
-            className="w-full max-w-md mx-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))] mt-auto flex flex-col gap-3"
+            className="w-full max-w-md mx-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))] mt-auto flex flex-col gap-2.5"
             onClick={e => e.stopPropagation()}
           >
             {/* Sheet Card */}
             <div 
-              className="backdrop-blur-xl backdrop-saturate-150 bg-white dark:bg-gray-900/90 border border-white/15 rounded-3xl overflow-hidden shadow-2xl divide-y divide-white/10"
+              className="backdrop-blur-2xl backdrop-saturate-150 bg-white/95 dark:bg-[#1C1C1E]/95 border border-black/[0.08] dark:border-white/[0.12] rounded-3xl overflow-hidden shadow-2xl divide-y divide-black/[0.06] dark:divide-white/[0.08]"
               data-testid="action-sheet"
               style={{ 
                 borderRadius: '24px', 
@@ -164,7 +170,7 @@ export const BottomNavigation = ({
               }}
             >
               <div className="py-3 px-4 text-center">
-                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tambah Jadwal Baru</p>
+                <p className="text-[11px] font-semibold text-[#6E6E73] dark:text-[#98989D] uppercase tracking-wider">Tambah Jadwal Baru</p>
               </div>
 
               {/* Jadwal Rutin */}
@@ -174,14 +180,14 @@ export const BottomNavigation = ({
                   onAddRutin();
                 }}
                 data-testid="action-add-rutin"
-                className="w-full min-h-[52px] px-5 py-3.5 flex items-center gap-3.5 hover:bg-white/10 active:bg-white/15 transition-colors text-left cursor-pointer"
+                className="w-full min-h-[52px] px-5 py-3.5 flex items-center gap-3.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] active:bg-black/[0.08] dark:active:bg-white/[0.10] transition-colors text-left cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-emerald-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-emerald-500 dark:border-indigo-500/30">
+                <div className="w-9 h-9 rounded-xl bg-[#007AFF]/12 dark:bg-[#0A84FF]/20 text-[#007AFF] dark:text-[#0A84FF] flex items-center justify-center shrink-0">
                   <Calendar className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">Jadwal Rutin</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Jadwal kuliah atau kegiatan mingguan berulang</p>
+                  <p className="text-sm font-semibold text-[#1D1D1F] dark:text-white">Jadwal Rutin</p>
+                  <p className="text-xs text-[#6E6E73] dark:text-[#98989D]">Jadwal kuliah atau kegiatan mingguan berulang</p>
                 </div>
               </button>
 
@@ -192,14 +198,14 @@ export const BottomNavigation = ({
                   onAddDinamis();
                 }}
                 data-testid="action-add-dinamis"
-                className="w-full min-h-[52px] px-5 py-3.5 flex items-center gap-3.5 hover:bg-white/10 active:bg-white/15 transition-colors text-left cursor-pointer"
+                className="w-full min-h-[52px] px-5 py-3.5 flex items-center gap-3.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] active:bg-black/[0.08] dark:active:bg-white/[0.10] transition-colors text-left cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/30">
+                <div className="w-9 h-9 rounded-xl bg-[#007AFF]/12 dark:bg-[#0A84FF]/20 text-[#007AFF] dark:text-[#0A84FF] flex items-center justify-center shrink-0">
                   <Clock className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">Jadwal Dinamis</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Tugas, belajar mandiri, atau event fleksibel</p>
+                  <p className="text-sm font-semibold text-[#1D1D1F] dark:text-white">Jadwal Dinamis</p>
+                  <p className="text-xs text-[#6E6E73] dark:text-[#98989D]">Tugas, belajar mandiri, atau event fleksibel</p>
                 </div>
               </button>
 
@@ -210,14 +216,14 @@ export const BottomNavigation = ({
                   onAddMagicPaste();
                 }}
                 data-testid="action-add-magic-paste"
-                className="w-full min-h-[52px] px-5 py-3.5 flex items-center gap-3.5 hover:bg-white/10 active:bg-white/15 transition-colors text-left cursor-pointer"
+                className="w-full min-h-[52px] px-5 py-3.5 flex items-center gap-3.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] active:bg-black/[0.08] dark:active:bg-white/[0.10] transition-colors text-left cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30">
+                <div className="w-9 h-9 rounded-xl bg-[#007AFF]/12 dark:bg-[#0A84FF]/20 text-[#007AFF] dark:text-[#0A84FF] flex items-center justify-center shrink-0">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-amber-300">✨ Magic Paste AI</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Ekstrak jadwal instan dari teks chat / silabus</p>
+                  <p className="text-sm font-semibold text-[#007AFF] dark:text-[#0A84FF]">Magic Paste AI</p>
+                  <p className="text-xs text-[#6E6E73] dark:text-[#98989D]">Ekstrak jadwal instan dari teks chat / silabus</p>
                 </div>
               </button>
             </div>
@@ -226,7 +232,7 @@ export const BottomNavigation = ({
             <button
               onClick={() => setActionSheetOpen(false)}
               data-testid="action-cancel"
-              className="w-full min-h-[48px] py-3 rounded-2xl backdrop-blur-xl backdrop-saturate-150 bg-white dark:bg-gray-900/90 hover:bg-gray-100 dark:bg-gray-800 active:bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-semibold text-sm border border-white/15 transition shadow-lg text-center cursor-pointer"
+              className="w-full min-h-[48px] py-3 rounded-2xl backdrop-blur-2xl backdrop-saturate-150 bg-white/95 dark:bg-[#1C1C1E]/95 hover:bg-white dark:hover:bg-[#2C2C2E] text-[#007AFF] dark:text-[#0A84FF] font-semibold text-sm border border-black/[0.08] dark:border-white/[0.12] transition shadow-lg text-center cursor-pointer"
               style={{ 
                 borderRadius: '20px', 
                 WebkitBorderRadius: '20px',
@@ -245,7 +251,7 @@ export const BottomNavigation = ({
       {/* Main Bottom Navigation Bar (Apple HIG Tab Bar) */}
       <nav 
         data-testid="bottom-navigation-bar"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-gray-50 dark:bg-gray-950/85 backdrop-blur-xl backdrop-saturate-150 border-t border-white/10 shadow-[0_-4px_24px_rgba(0,0,0,0.5)] select-none"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/85 dark:bg-[#1C1C1E]/85 backdrop-blur-xl backdrop-saturate-150 border-t border-black/[0.08] dark:border-white/[0.10] shadow-[0_-4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.5)] select-none"
       >
         <div className="flex items-center justify-around px-2 pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] py-1 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
           {/* Tab 1: Jadwal */}
@@ -253,11 +259,13 @@ export const BottomNavigation = ({
             onClick={() => {
               setActionSheetOpen(false);
               onCloseMatkulWajib?.();
+              onCloseSettings?.();
+              onCloseFilter?.();
               onCloseForm?.();
             }}
             data-testid="bottom-nav-jadwal"
             className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 cursor-pointer ${
-              isScheduleActive ? 'text-emerald-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+              isScheduleActive ? 'text-[#007AFF] dark:text-[#0A84FF]' : 'text-[#6E6E73] dark:text-[#98989D] hover:text-[#1D1D1F] dark:hover:text-white'
             }`}
             aria-label="Jadwal Kalender"
             aria-pressed={isScheduleActive}
@@ -273,7 +281,7 @@ export const BottomNavigation = ({
             }}
             data-testid="bottom-nav-tambah"
             className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 cursor-pointer ${
-              actionSheetOpen ? 'text-emerald-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+              actionSheetOpen ? 'text-[#007AFF] dark:text-[#0A84FF]' : 'text-[#6E6E73] dark:text-[#98989D] hover:text-[#1D1D1F] dark:hover:text-white'
             }`}
             aria-label="Tambah Jadwal"
             aria-expanded={actionSheetOpen}
@@ -286,6 +294,7 @@ export const BottomNavigation = ({
           <button
             onClick={() => {
               setActionSheetOpen(false);
+              onCloseSettings?.();
               if (isMatkulWajibOpen) {
                 onCloseMatkulWajib?.();
               } else {
@@ -294,7 +303,7 @@ export const BottomNavigation = ({
             }}
             data-testid="bottom-nav-matkul"
             className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 cursor-pointer ${
-              isMatkulWajibOpen ? 'text-emerald-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-amber-400'
+              isMatkulWajibOpen ? 'text-[#007AFF] dark:text-[#0A84FF]' : 'text-[#6E6E73] dark:text-[#98989D] hover:text-[#1D1D1F] dark:hover:text-white'
             }`}
             aria-label="Matkul Wajib"
             aria-pressed={isMatkulWajibOpen}
@@ -307,11 +316,19 @@ export const BottomNavigation = ({
           <button
             onClick={() => {
               setActionSheetOpen(false);
-              onOpenSettings();
+              onCloseMatkulWajib?.();
+              if (isSettingsOpen) {
+                onCloseSettings?.();
+              } else {
+                onOpenSettings();
+              }
             }}
             data-testid="bottom-nav-settings"
-            className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer"
+            className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 cursor-pointer ${
+              isSettingsOpen ? 'text-[#007AFF] dark:text-[#0A84FF]' : 'text-[#6E6E73] dark:text-[#98989D] hover:text-[#1D1D1F] dark:hover:text-white'
+            }`}
             aria-label="Pengaturan"
+            aria-pressed={isSettingsOpen}
           >
             <Settings className="w-5 h-5" />
             <span className="text-[10px] font-medium tracking-tight mt-1">Pengaturan</span>
@@ -321,7 +338,7 @@ export const BottomNavigation = ({
           <button
             onClick={handleCopyLink}
             data-testid="bottom-nav-share"
-            className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 text-gray-500 dark:text-gray-400 hover:text-sky-400 cursor-pointer"
+            className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 py-1 px-1 rounded-xl transition-all active:scale-95 text-[#6E6E73] dark:text-[#98989D] hover:text-[#007AFF] dark:hover:text-[#0A84FF] cursor-pointer"
             aria-label="Bagikan Jadwal"
           >
             <Share2 className="w-5 h-5" />
@@ -332,3 +349,4 @@ export const BottomNavigation = ({
     </>
   );
 };
+

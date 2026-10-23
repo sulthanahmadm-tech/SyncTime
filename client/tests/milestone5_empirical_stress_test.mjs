@@ -377,31 +377,23 @@ runTest('8.1 Header.tsx weekRange text contrast is readable in light mode', () =
   );
 });
 
-runTest('8.2 WeeklyCalendar.tsx today badge uses white text, not charcoal in light mode', () => {
+runTest('8.2 WeeklyCalendar.tsx today badge uses Apple Red (#FF3B30) with white text', () => {
   const calPath = path.join(rootDir, 'client', 'src', 'components', 'Calendar', 'WeeklyCalendar.tsx');
   const content = fs.readFileSync(calPath, 'utf8');
 
   assert.ok(
-    !content.includes('bg-emerald-600 text-gray-900 dark:text-white'),
-    'WeeklyCalendar.tsx must not use text-gray-900 on bg-emerald-600'
-  );
-  assert.ok(
-    /isToday\s*\?\s*['"][^'"]*bg-emerald-600[^'"]*text-white/.test(content),
-    'WeeklyCalendar.tsx today badge must use text-white'
+    content.includes('bg-[#FF3B30]') && content.includes('text-white'),
+    'WeeklyCalendar.tsx today badge must use bg-[#FF3B30] with text-white'
   );
 });
 
-runTest('8.3 Sidebar.tsx primary action buttons use text-white', () => {
+runTest('8.3 Sidebar.tsx primary action button uses Apple System Blue (#007AFF) with text-white', () => {
   const sidebarPath = path.join(rootDir, 'client', 'src', 'components', 'Layout', 'Sidebar.tsx');
   const content = fs.readFileSync(sidebarPath, 'utf8');
 
   assert.ok(
-    !content.includes('bg-emerald-600 text-gray-900 dark:text-white'),
-    'Sidebar.tsx must not use text-gray-900 on emerald button'
-  );
-  assert.ok(
-    /bg-emerald-600[^"]*text-white/.test(content),
-    'Sidebar.tsx + Jadwal Baru button must use text-white'
+    /bg-\[#007AFF\][^"]*text-white/.test(content),
+    'Sidebar.tsx + Jadwal Baru button must use bg-[#007AFF] with text-white'
   );
 });
 

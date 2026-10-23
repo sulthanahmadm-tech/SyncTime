@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { SlidersHorizontal, X } from 'lucide-react';
 import { CategoryChart } from '../Analytics/CategoryChart';
+import { Checkbox } from '../UI/Checkbox';
 import type { Kategori } from '../../lib/types';
 
 interface FilterModalProps {
@@ -26,11 +27,18 @@ export const FilterModal = ({
         onClose();
       }
     };
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        onClose();
+      }
+    };
     if (isOpen) {
       window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener('resize', handleResize);
     }
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('resize', handleResize);
     };
   }, [isOpen, onClose]);
 
@@ -38,12 +46,12 @@ export const FilterModal = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 md:hidden"
+      className="fixed inset-0 z-50 flex flex-col justify-end bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 md:hidden"
       onClick={onClose}
       data-testid="filter-sheet-backdrop"
     >
       <div 
-        className="w-full max-w-lg mx-auto bg-white dark:bg-gray-900/95 backdrop-blur-xl backdrop-saturate-150 border-t border-white/15 rounded-t-3xl p-5 pb-[max(1.5rem,calc(env(safe-area-inset-bottom)+1rem))] shadow-2xl max-h-[85vh] overflow-y-auto flex flex-col gap-4 text-gray-900 dark:text-white animate-in slide-in-from-bottom-5 duration-200"
+        className="w-full max-w-lg mx-auto bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-2xl backdrop-saturate-150 border-t border-black/[0.08] dark:border-white/[0.12] rounded-t-3xl p-5 pb-[max(1.5rem,calc(env(safe-area-inset-bottom)+1rem))] shadow-2xl max-h-[85vh] overflow-y-auto flex flex-col gap-4 text-[#1D1D1F] dark:text-[#F5F5F7] animate-in slide-in-from-bottom-5 duration-200"
         onClick={e => e.stopPropagation()}
         data-testid="filter-sheet"
         style={{ 
@@ -58,17 +66,17 @@ export const FilterModal = ({
         }}
       >
         {/* Grab handle & sticky header */}
-        <div className="sticky -top-5 bg-white dark:bg-gray-900/95 backdrop-blur-xl backdrop-saturate-150 pt-2 pb-3 -mt-2 -mx-5 px-5 border-b border-gray-200 dark:border-white/10 z-10">
-          <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-3 shrink-0" />
+        <div className="sticky -top-5 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-2xl backdrop-saturate-150 pt-2 pb-3 -mt-2 -mx-5 px-5 border-b border-black/[0.06] dark:border-white/[0.08] z-10">
+          <div className="w-10 h-1 bg-black/15 dark:bg-white/20 rounded-full mx-auto mb-3 shrink-0" />
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <SlidersHorizontal className="w-5 h-5 text-emerald-600 dark:text-indigo-400" />
+            <h3 className="text-base font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7] flex items-center gap-2">
+              <SlidersHorizontal className="w-4 h-4 text-[#007AFF] dark:text-[#0A84FF]" />
               Filter & Analisis
             </h3>
             <button 
               onClick={onClose}
               data-testid="filter-close"
-              className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 dark:bg-white/5 dark:hover:bg-white/10 dark:active:bg-white/20 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-white flex items-center justify-center transition cursor-pointer min-w-[44px] min-h-[44px]"
+              className="w-9 h-9 rounded-full bg-[#F2F2F7] hover:bg-black/10 dark:bg-[#2C2C2E] dark:hover:bg-white/10 text-[#6E6E73] dark:text-[#8E8E93] hover:text-[#1D1D1F] dark:hover:text-[#F5F5F7] flex items-center justify-center transition cursor-pointer min-w-[44px] min-h-[44px]"
               aria-label="Tutup"
             >
               <X className="w-5 h-5" />
@@ -78,52 +86,47 @@ export const FilterModal = ({
 
         {/* Filter checkboxes */}
         <div>
-          <h4 className="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2.5">Filter Tampilan</h4>
+          <h4 className="text-[#6E6E73] dark:text-[#8E8E93] text-[11px] font-semibold uppercase tracking-wider mb-2">Filter Tampilan</h4>
           <div className="space-y-2">
-            <label className="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10 cursor-pointer transition min-h-[44px]">
-              <input 
-                type="checkbox" 
-                checked={filters.rutin} 
-                onChange={e => onFilterChange({ ...filters, rutin: e.target.checked })} 
-                className="w-5 h-5 rounded bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-emerald-600 dark:text-indigo-500 focus:ring-emerald-500 dark:ring-indigo-500 cursor-pointer"
+            <div className="p-3 rounded-2xl bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/[0.04] dark:border-white/[0.06] min-h-[44px] flex items-center">
+              <Checkbox
+                checked={filters.rutin}
+                onChange={(checked) => onFilterChange({ ...filters, rutin: checked })}
+                label="Tampilkan Jadwal Rutin"
+                variant="smooth"
               />
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">Tampilkan Jadwal Rutin</span>
-            </label>
-            <label className="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10 cursor-pointer transition min-h-[44px]">
-              <input 
-                type="checkbox" 
-                checked={filters.dinamis} 
-                onChange={e => onFilterChange({ ...filters, dinamis: e.target.checked })} 
-                className="w-5 h-5 rounded bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-emerald-600 dark:text-indigo-500 focus:ring-emerald-500 dark:ring-indigo-500 cursor-pointer"
+            </div>
+            <div className="p-3 rounded-2xl bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/[0.04] dark:border-white/[0.06] min-h-[44px] flex items-center">
+              <Checkbox
+                checked={filters.dinamis}
+                onChange={(checked) => onFilterChange({ ...filters, dinamis: checked })}
+                label="Tampilkan Jadwal Dinamis"
+                variant="smooth"
               />
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">Tampilkan Jadwal Dinamis</span>
-            </label>
+            </div>
           </div>
         </div>
 
         {/* Kategori list */}
         <div>
-          <h4 className="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2.5">Kategori Jadwal</h4>
+          <h4 className="text-[#6E6E73] dark:text-[#8E8E93] text-[11px] font-semibold uppercase tracking-wider mb-2">Kategori Jadwal</h4>
           {kategoriList.length > 0 ? (
             <div className="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto">
               {kategoriList.map(kat => (
-                <div key={kat.id} className="flex items-center gap-2.5 p-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs">
-                  <span className="w-3 h-3 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: kat.warna_hex }} />
-                  <span className="truncate font-medium">{kat.nama_kategori}</span>
+                <div key={kat.id} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/[0.04] dark:border-white/[0.06] text-xs">
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs" style={{ backgroundColor: kat.warna_hex }} />
+                  <span className="truncate font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">{kat.nama_kategori}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-xs text-gray-500 italic py-2">Belum ada kategori yang dibuat</p>
+            <p className="text-xs text-[#8E8E93] italic py-2">Belum ada kategori yang dibuat</p>
           )}
         </div>
 
         {/* Analytics CategoryChart */}
-        <div className="pt-3 border-t border-gray-200 dark:border-white/10">
-          <h4 className="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2.5">Distribusi Waktu Minggu Ini</h4>
-          <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-2xl border border-gray-200 dark:border-white/5">
-            <CategoryChart weekStart={weekStart} />
-          </div>
+        <div className="pt-3 border-t border-black/[0.06] dark:border-white/[0.08]">
+          <CategoryChart weekStart={weekStart} />
         </div>
       </div>
     </div>

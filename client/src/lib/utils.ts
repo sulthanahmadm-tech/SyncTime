@@ -75,3 +75,91 @@ export const getBlockPosition = (start: string, end: string) => {
   
   return { top, height: finalHeight, isHidden };
 };
+
+export const hexToRgba = (hex: string, alpha: number): string => {
+  let clean = (hex || '#007AFF').trim().replace(/^#/, '');
+  if (clean.length === 3) {
+    clean = clean[0] + clean[0] + clean[1] + clean[1] + clean[2] + clean[2];
+  } else if (clean.length === 8) {
+    clean = clean.substring(0, 6);
+  }
+  if (clean.length !== 6) return `rgba(0, 122, 255, ${alpha})`;
+  const r = parseInt(clean.substring(0, 2), 16);
+  const g = parseInt(clean.substring(2, 4), 16);
+  const b = parseInt(clean.substring(4, 6), 16);
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return `rgba(0, 122, 255, ${alpha})`;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
+export interface BlockLayoutInfo {
+  columnIndex: number;
+  totalColumns: number;
+}
+
+export const computeOverlapLayout = <T extends { id: number; type: string; start: string; end: string }>(
+  blocks: T[]
+): Map<string, BlockLayoutInfo> => {
+  const layoutMap = new Map<string, BlockLayoutInfo>();
+  if (blocks.length === 0) return layoutMap;
+
+  const items = blocks
+    .map((b) => {
+      const pos = getBlockPosition(b.start, b.end);
+      return {
+        key: `${b.type}-${b.id}`,
+        top: pos.top,
+        bottom: pos.top + Math.max(pos.height, 15),
+        isHidden: pos.isHidden,
+      };
+    })
+    .filter((item) => !item.isHidden)
+    .sort((a, b) => a.top - b.top || b.bottom - a.bottom);
+
+  // Group into connected overlap clusters
+  let cluster: typeof items = [];
+  let clusterMaxBottom = -1;
+
+  const flushCluster = (grp: typeof items) => {
+    if (grp.length === 0) return;
+    const colEnds: number[] = [];
+    const assignedCol = new Map<string, number>();
+
+    for (const item of grp) {
+      let placedCol = -1;
+      for (let c = 0; c < colEnds.length; c++) {
+        if (colEnds[c] <= item.top) {
+          placedCol = c;
+          colEnds[c] = item.bottom;
+          break;
+        }
+      }
+      if (placedCol === -1) {
+        placedCol = colEnds.length;
+        colEnds.push(item.bottom);
+      }
+      assignedCol.set(item.key, placedCol);
+    }
+
+    const totalCols = Math.max(1, colEnds.length);
+    for (const item of grp) {
+      layoutMap.set(item.key, {
+        columnIndex: assignedCol.get(item.key) ?? 0,
+        totalColumns: totalCols,
+      });
+    }
+  };
+
+  for (const item of items) {
+    if (cluster.length === 0 || item.top < clusterMaxBottom) {
+      cluster.push(item);
+      clusterMaxBottom = Math.max(clusterMaxBottom, item.bottom);
+    } else {
+      flushCluster(cluster);
+      cluster = [item];
+      clusterMaxBottom = item.bottom;
+    }
+  }
+  flushCluster(cluster);
+
+  return layoutMap;
+};

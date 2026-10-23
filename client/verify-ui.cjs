@@ -186,7 +186,7 @@ async function runTests() {
       'bottom-nav-jadwal',
       'bottom-nav-tambah',
       'bottom-nav-matkul',
-      'bottom-nav-filter',
+      'bottom-nav-settings',
       'bottom-nav-share'
     ];
 
@@ -236,9 +236,9 @@ async function runTests() {
     actionSheet = await page.$('[data-testid="action-sheet"]');
     assert(actionSheet === null, 'Tapping "Batal" dismisses Action Sheet');
 
-    // 4b. "Filter" opens filter sheet & locks body scroll
-    console.log('\n--- Testing Bottom Nav Filter & Analytics Sheet ---');
-    await page.click('[data-testid="bottom-nav-filter"]');
+    // 4b. "Filter" button in header opens filter sheet & locks body scroll
+    console.log('\n--- Testing Header Filter & Analytics Sheet ---');
+    await page.click('[data-testid="header-filter-button"]');
     await page.waitForSelector('[data-testid="filter-sheet"]', { timeout: 2000 });
     let filterSheet = await page.$('[data-testid="filter-sheet"]');
     assert(filterSheet !== null, 'Tapping "Filter" opens Filter & Analytics Sheet');
@@ -261,7 +261,7 @@ async function runTests() {
     assert(filterSheet === null, 'Pressing Escape dismisses Filter Sheet');
 
     // Re-open and tap close button in filter sheet
-    await page.click('[data-testid="bottom-nav-filter"]');
+    await page.click('[data-testid="header-filter-button"]');
     await page.waitForSelector('[data-testid="filter-sheet"]', { timeout: 2000 });
     await page.click('[data-testid="filter-close"]');
     await new Promise(r => setTimeout(r, 200));

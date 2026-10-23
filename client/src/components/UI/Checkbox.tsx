@@ -49,17 +49,19 @@ export const Checkbox = ({
           <motion.div
             initial={false}
             animate={{
-              backgroundColor: checked ? '#10b981' : 'transparent', // emerald-500
-              borderColor: checked ? '#10b981' : '#4b5563', // emerald-500 or gray-600
-              scale: checked ? [1, 1.2, 1] : 1
+              scale: checked ? [1, 1.15, 1] : 1
             }}
-            transition={{ duration: 0.2 }}
-            className={`${dimensions[size]} border-2 rounded shrink-0 flex items-center justify-center`}
+            transition={{ duration: 0.18 }}
+            className={`${dimensions[size]} border-[1.5px] rounded-[5px] shrink-0 flex items-center justify-center transition-colors duration-150 ${
+              checked
+                ? 'bg-[#007AFF] border-[#007AFF] dark:bg-[#0A84FF] dark:border-[#0A84FF]'
+                : 'bg-transparent border-[#8E8E93]/60'
+            }`}
           >
             <motion.svg
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: checked ? 1 : 0, opacity: checked ? 1 : 0 }}
-              transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 20 }}
+              transition={{ delay: 0.05, type: "spring", stiffness: 320, damping: 22 }}
               className={`${iconSizes[size]} text-white`}
               fill="none"
               viewBox="0 0 24 24"
@@ -71,14 +73,14 @@ export const Checkbox = ({
           </motion.div>
         ) : (
           <div
-            className={`${dimensions[size]} border-2 rounded shrink-0 flex items-center justify-center transition-all duration-200
+            className={`${dimensions[size]} border-[1.5px] rounded-[6px] shrink-0 flex items-center justify-center transition-all duration-150
               ${checked 
-                ? 'bg-emerald-500 border-emerald-500 dark:bg-emerald-500 dark:border-emerald-500' 
-                : 'bg-white border-gray-300 dark:bg-gray-800 dark:border-gray-600'
+                ? 'bg-[#007AFF] border-[#007AFF] dark:bg-[#0A84FF] dark:border-[#0A84FF]' 
+                : 'bg-white border-black/20 dark:bg-[#2C2C2E] dark:border-white/20'
               }`}
           >
             <svg
-              className={`${iconSizes[size]} text-white transition-opacity duration-200 ${checked ? 'opacity-100' : 'opacity-0'}`}
+              className={`${iconSizes[size]} text-white transition-opacity duration-150 ${checked ? 'opacity-100' : 'opacity-0'}`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -90,10 +92,11 @@ export const Checkbox = ({
         )}
       </div>
       {label && (
-        <span className="text-gray-700 dark:text-gray-300 font-medium select-none text-sm">
+        <span className="text-[#1D1D1F] dark:text-[#E5E5EA] font-medium select-none text-[13px]">
           {label}
         </span>
       )}
     </label>
   );
 };
+

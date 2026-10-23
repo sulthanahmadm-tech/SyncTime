@@ -296,8 +296,8 @@ async function runBrowserE2E() {
 
       await page.click('button[type="submit"]');
 
-      await page.waitForSelector('.bg-emerald-50', { timeout: 3000 });
-      const bannerText = await page.$eval('.bg-emerald-50', el => el.textContent.trim());
+      await page.waitForSelector('[data-testid="registration-info-banner"]', { timeout: 3000 });
+      const bannerText = await page.$eval('[data-testid="registration-info-banner"]', el => el.textContent.trim());
       console.log('  [Registration Info Banner]:', bannerText);
 
       assert(
