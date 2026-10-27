@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS kategori (
   id SERIAL PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   nama_kategori TEXT NOT NULL,
-  warna_hex TEXT NOT NULL
+  warna_hex TEXT NOT NULL,
+  CONSTRAINT uq_kategori_user_nama UNIQUE (user_id, nama_kategori)
 );
 
 -- 3. KEGIATAN RUTIN TABLE
@@ -57,6 +58,7 @@ CREATE TABLE IF NOT EXISTS rutin_exceptions (
 -- ==============================================================================
 CREATE INDEX IF NOT EXISTS idx_kategori_user_id ON public.kategori(user_id);
 CREATE INDEX IF NOT EXISTS idx_kegiatan_rutin_user_id ON public.kegiatan_rutin(user_id);
+CREATE INDEX IF NOT EXISTS idx_kegiatan_rutin_user_hari ON public.kegiatan_rutin(user_id, hari_mingguan);
 CREATE INDEX IF NOT EXISTS idx_kegiatan_rutin_kategori_id ON public.kegiatan_rutin(kategori_id);
 CREATE INDEX IF NOT EXISTS idx_kegiatan_dinamis_user_id ON public.kegiatan_dinamis(user_id);
 CREATE INDEX IF NOT EXISTS idx_kegiatan_dinamis_kategori_id ON public.kegiatan_dinamis(kategori_id);
@@ -74,19 +76,18 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  -- Insert profile for new user
+  -- Insert profile for new user (and keep email synced on conflict)
   INSERT INTO public.profiles (id, email)
   VALUES (NEW.id, NEW.email)
   ON CONFLICT (id) DO NOTHING;
   
-  -- Insert default categories if not already present
-  IF NOT EXISTS (SELECT 1 FROM public.kategori WHERE user_id = NEW.id) THEN
-    INSERT INTO public.kategori (user_id, nama_kategori, warna_hex) VALUES
-      (NEW.id, 'Kuliah', '#EF4444'),
-      (NEW.id, 'Acara Kampus', '#F59E0B'),
-      (NEW.id, 'Tugas', '#3B82F6'),
-      (NEW.id, 'Downtime', '#22C55E');
-  END IF;
+  -- Insert default categories safely and idempotently
+  INSERT INTO public.kategori (user_id, nama_kategori, warna_hex) VALUES
+    (NEW.id, 'Kuliah', '#EF4444'),
+    (NEW.id, 'Acara Kampus', '#F59E0B'),
+    (NEW.id, 'Tugas', '#3B82F6'),
+    (NEW.id, 'Downtime', '#22C55E')
+  ON CONFLICT (user_id, nama_kategori) DO NOTHING;
   
   RETURN NEW;
 EXCEPTION
@@ -112,10 +113,12 @@ ALTER TABLE kegiatan_rutin ENABLE ROW LEVEL SECURITY;
 ALTER TABLE kegiatan_dinamis ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rutin_exceptions ENABLE ROW LEVEL SECURITY;
 
--- Profiles: users can only see/edit their own
+-- Profiles: users can only see/insert/edit their own
 DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
 DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING ((select auth.uid()) = id);
+CREATE POLICY "Users can insert own profile" ON profiles FOR INSERT WITH CHECK ((select auth.uid()) = id);
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING ((select auth.uid()) = id);
 
 -- Kategori: users can only CRUD their own

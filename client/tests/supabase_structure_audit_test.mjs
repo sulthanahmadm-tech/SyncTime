@@ -81,12 +81,14 @@ runTest('1.4 handle_new_user trigger function includes EXCEPTION safeguard', () 
   assert.ok(schemaContent.includes('RETURN NEW;'), 'handle_new_user must return NEW to permit auth signup');
 });
 
-runTest('1.5 All 18 RLS policies are idempotent with DROP POLICY IF EXISTS', () => {
+runTest('1.5 All 19 RLS policies are idempotent with DROP POLICY IF EXISTS', () => {
   const dropMatches = schemaContent.match(/DROP POLICY IF EXISTS/g) || [];
-  assert.strictEqual(dropMatches.length, 18, `Expected 18 DROP POLICY IF EXISTS statements, found ${dropMatches.length}`);
+  assert.strictEqual(dropMatches.length, 19, `Expected 19 DROP POLICY IF EXISTS statements, found ${dropMatches.length}`);
   
   const createMatches = schemaContent.match(/CREATE POLICY/g) || [];
-  assert.strictEqual(createMatches.length, 18, `Expected 18 CREATE POLICY statements, found ${createMatches.length}`);
+  assert.strictEqual(createMatches.length, 19, `Expected 19 CREATE POLICY statements, found ${createMatches.length}`);
+
+  assert.ok(schemaContent.includes('"Users can insert own profile" ON profiles'), 'Must have INSERT policy on profiles');
 
   // Must not evaluate auth.uid() per row (must use subquery)
   assert.ok(!schemaContent.match(/\bauth\.uid\(\)\s*=\s*(?:user_id|id)\b/), 'Must use (select auth.uid())');
@@ -112,11 +114,13 @@ runTest('2.1 fix_auth_signup_trigger.sql includes EXCEPTION block and orphan rep
 const fixRlsPath = path.join(rootDir, 'supabase', 'fix_rls_performance.sql');
 const fixRlsContent = fs.readFileSync(fixRlsPath, 'utf8');
 
-runTest('2.2 fix_rls_performance.sql includes performance indexes and unique constraint', () => {
+runTest('2.2 fix_rls_performance.sql includes performance indexes and unique constraints', () => {
   assert.ok(fixRlsContent.includes('CREATE INDEX IF NOT EXISTS idx_kategori_user_id'), 'Must create category index');
+  assert.ok(fixRlsContent.includes('idx_kegiatan_rutin_user_hari'), 'Must create routine user+hari index');
+  assert.ok(fixRlsContent.includes('uq_kategori_user_nama'), 'Must add uq_kategori_user_nama constraint');
   assert.ok(fixRlsContent.includes('uq_rutin_exception'), 'Must add uq_rutin_exception constraint');
   const dropMatches = fixRlsContent.match(/DROP POLICY IF EXISTS/g) || [];
-  assert.strictEqual(dropMatches.length, 18, 'Must drop all 18 policies');
+  assert.strictEqual(dropMatches.length, 19, 'Must drop all 19 policies');
 });
 
 // -----------------------------------------------------------------------------
@@ -214,6 +218,64 @@ runTest('4.2 client/src/lib/types.ts exports RutinException', () => {
   assert.ok(content.includes('export interface RutinException'), 'Must export RutinException');
   assert.ok(content.includes('kegiatan_rutin_id: number;'), 'Must have kegiatan_rutin_id');
   assert.ok(content.includes('tanggal_dilewati: string;'), 'Must have tanggal_dilewati');
+});
+
+// -----------------------------------------------------------------------------
+// SUITE 5: Timezone WIB Integrity & Route Robustness
+// -----------------------------------------------------------------------------
+console.log('\n--- SUITE 5: Timezone WIB Integrity & Route Robustness ---');
+
+runTest('5.1 server/src/routes/calendar.ts uses explicit +07:00 WIB offset', () => {
+  const calPath = path.join(rootDir, 'server', 'src', 'routes', 'calendar.ts');
+  const content = fs.readFileSync(calPath, 'utf8');
+  assert.ok(content.includes('+07:00'), 'calendar.ts must parse week_start with explicit +07:00');
+  assert.ok(!content.includes('new Date(week_start)'), 'calendar.ts must not parse raw week_start without offset');
+});
+
+runTest('5.2 server/src/routes/analytics.ts uses explicit +07:00 WIB offset', () => {
+  const anaPath = path.join(rootDir, 'server', 'src', 'routes', 'analytics.ts');
+  const content = fs.readFileSync(anaPath, 'utf8');
+  assert.ok(content.includes('+07:00'), 'analytics.ts must parse week_start with explicit +07:00');
+  assert.ok(!content.includes('new Date(week_start)'), 'analytics.ts must not parse raw week_start without offset');
+});
+
+runTest('5.3 server/src/routes/shared.ts uses explicit +07:00 WIB offset', () => {
+  const sharedPath = path.join(rootDir, 'server', 'src', 'routes', 'shared.ts');
+  const content = fs.readFileSync(sharedPath, 'utf8');
+  assert.ok(content.includes('+07:00'), 'shared.ts must parse week_start with explicit +07:00');
+  assert.ok(!content.includes('new Date(week_start)'), 'shared.ts must not parse raw week_start without offset');
+});
+
+runTest('5.4 server/src/routes/scheduleMove.ts returns 404 for missing activities', () => {
+  const movePath = path.join(rootDir, 'server', 'src', 'routes', 'scheduleMove.ts');
+  const content = fs.readFileSync(movePath, 'utf8');
+  assert.ok(content.includes('updatedDinamis'), 'scheduleMove.ts must check updated rows for dinamis');
+  assert.ok(content.includes('updatedRutin'), 'scheduleMove.ts must check updated rows for rutin');
+  assert.ok(content.includes('dateUtc.getUTCDay()'), 'scheduleMove.ts must use UTC day of week');
+});
+
+runTest('5.5 server/src/routes/kategori.ts uses idempotent upsert on category auto-healing', () => {
+  const katPath = path.join(rootDir, 'server', 'src', 'routes', 'kategori.ts');
+  const content = fs.readFileSync(katPath, 'utf8');
+  assert.ok(content.includes('.upsert('), 'kategori.ts must use upsert for default categories');
+  assert.ok(content.includes('ignoreDuplicates: true'), 'kategori.ts must set ignoreDuplicates: true');
+});
+
+runTest('5.6 WeeklyCalendar.tsx filters UTC ISO blocks by local date', () => {
+  const calCompPath = path.join(rootDir, 'client', 'src', 'components', 'Calendar', 'WeeklyCalendar.tsx');
+  const content = fs.readFileSync(calCompPath, 'utf8');
+  assert.ok(content.includes('getLocalDateString(new Date(b.start)) === dateStr'), 'WeeklyCalendar must resolve local date for UTC blocks');
+});
+
+runTest('5.7 AuthContext & LoginPage handle email verification session flow', () => {
+  const authPath = path.join(rootDir, 'client', 'src', 'contexts', 'AuthContext.tsx');
+  const authContent = fs.readFileSync(authPath, 'utf8');
+  assert.ok(authContent.includes('return { data, error };'), 'AuthContext signUp must return data and error');
+
+  const loginPath = path.join(rootDir, 'client', 'src', 'pages', 'LoginPage.tsx');
+  const loginContent = fs.readFileSync(loginPath, 'utf8');
+  assert.ok(loginContent.includes('data?.session'), 'LoginPage must check data?.session');
+  assert.ok(loginContent.includes('inbox email'), 'LoginPage must inform user when verification is needed');
 });
 
 console.log('\n================================================================');

@@ -57,9 +57,9 @@ router.post('/matkul', async (req, res, next) => {
             ];
             const { data: createdCats } = await connection_1.supabase
                 .from('kategori')
-                .insert(defaultCategories)
+                .upsert(defaultCategories, { onConflict: 'user_id,nama_kategori', ignoreDuplicates: true })
                 .select('id, nama_kategori');
-            userCategories = createdCats || [];
+            userCategories = (createdCats && createdCats.length > 0) ? createdCats : (await connection_1.supabase.from('kategori').select('id, nama_kategori').eq('user_id', userId)).data || [];
         }
         const kuliahKategori = userCategories?.find(k => k.nama_kategori.toLowerCase() === 'kuliah') || userCategories?.[0];
         if (!kuliahKategori) {

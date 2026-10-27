@@ -12,9 +12,9 @@ router.get('/weekly', async (req: AuthenticatedRequest, res, next) => {
 
   try {
     const userId = req.user!.id;
-    const start = new Date(week_start);
-    const end = new Date(start);
-    end.setDate(end.getDate() + 7);
+    const weekStartClean = week_start.split('T')[0];
+    const start = new Date(`${weekStartClean}T00:00:00+07:00`);
+    const end = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
 
     const { data: categories, error: catError } = await supabase
       .from('kategori')
@@ -39,8 +39,9 @@ router.get('/weekly', async (req: AuthenticatedRequest, res, next) => {
       .eq('id', userId)
       .maybeSingle();
 
-    const startDateStr = start.toISOString().split('T')[0];
-    const endDateStr = end.toISOString().split('T')[0];
+    const startDateStr = weekStartClean;
+    const endWib = new Date(end.getTime() + 7 * 60 * 60 * 1000);
+    const endDateStr = endWib.toISOString().split('T')[0];
 
     const { data: exceptionsRes, error: exceptionsError } = await supabase
       .from('rutin_exceptions')
@@ -63,8 +64,7 @@ router.get('/weekly', async (req: AuthenticatedRequest, res, next) => {
     for (const r of (rutinRes || [])) {
       if (stats[r.kategori_id]) {
         const dayOffset = r.hari_mingguan - 1;
-        const eventDate = new Date(start);
-        eventDate.setDate(eventDate.getDate() + dayOffset);
+        const eventDate = new Date(start.getTime() + dayOffset * 24 * 60 * 60 * 1000 + 7 * 60 * 60 * 1000);
         const dateStr = eventDate.toISOString().split('T')[0];
 
         // Skip if exception exists for this date

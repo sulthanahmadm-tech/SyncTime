@@ -10,11 +10,12 @@ router.get('/weekly', async (req, res, next) => {
     }
     try {
         const userId = req.user.id;
-        const start = new Date(week_start);
-        const end = new Date(start);
-        end.setDate(end.getDate() + 7);
-        const startDateStr = start.toISOString().split('T')[0];
-        const endDateStr = end.toISOString().split('T')[0];
+        const weekStartClean = week_start.split('T')[0];
+        const start = new Date(`${weekStartClean}T00:00:00+07:00`);
+        const end = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
+        const startDateStr = weekStartClean;
+        const endWib = new Date(end.getTime() + 7 * 60 * 60 * 1000);
+        const endDateStr = endWib.toISOString().split('T')[0];
         const { data: profile } = await connection_1.supabase
             .from('profiles')
             .select('semester_start, semester_end')
@@ -38,8 +39,7 @@ router.get('/weekly', async (req, res, next) => {
         const blocks = [];
         for (const row of (rutinRes || [])) {
             const dayOffset = row.hari_mingguan - 1;
-            const eventDate = new Date(start);
-            eventDate.setDate(eventDate.getDate() + dayOffset);
+            const eventDate = new Date(start.getTime() + dayOffset * 24 * 60 * 60 * 1000 + 7 * 60 * 60 * 1000);
             const dateStr = eventDate.toISOString().split('T')[0];
             // Skip if there's an exception for this date
             if (exceptionSet.has(`${row.id}-${dateStr}`)) {

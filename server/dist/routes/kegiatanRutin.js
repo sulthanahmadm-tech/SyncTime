@@ -57,11 +57,28 @@ router.post('/', async (req, res, next) => {
         const userId = req.user.id;
         const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
         const nowWib = new Date(Date.now() + WIB_OFFSET_MS);
-        let currentDay = nowWib.getUTCDay();
+        const { data: profile } = await connection_1.supabase
+            .from('profiles')
+            .select('semester_start, semester_end')
+            .eq('id', userId)
+            .maybeSingle();
+        let refDate = nowWib;
+        if (profile?.semester_start && profile?.semester_end) {
+            const todayStr = nowWib.toISOString().split('T')[0];
+            if (todayStr < profile.semester_start) {
+                const [sy, sm, sd] = profile.semester_start.split('-').map(Number);
+                refDate = new Date(Date.UTC(sy, sm - 1, sd));
+            }
+            else if (todayStr > profile.semester_end) {
+                const [ey, em, ed] = profile.semester_end.split('-').map(Number);
+                refDate = new Date(Date.UTC(ey, em - 1, ed));
+            }
+        }
+        let currentDay = refDate.getUTCDay();
         if (currentDay === 0)
             currentDay = 7;
         const diff = Number(hari_mingguan) - currentDay;
-        const checkDate = new Date(nowWib);
+        const checkDate = new Date(refDate);
         checkDate.setUTCDate(checkDate.getUTCDate() + diff);
         const dateStr = checkDate.toISOString().split('T')[0];
         const normStart = String(jam_mulai).length === 5 ? `${jam_mulai}:00` : String(jam_mulai);
@@ -88,7 +105,7 @@ router.post('/', async (req, res, next) => {
             is_matkul_wajib: is_matkul_wajib || false
         })
             .select()
-            .single();
+            .maybeSingle();
         if (error)
             throw error;
         res.status(201).json(data);
@@ -105,11 +122,28 @@ router.put('/:id', async (req, res, next) => {
         const userId = req.user.id;
         const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
         const nowWib = new Date(Date.now() + WIB_OFFSET_MS);
-        let currentDay = nowWib.getUTCDay();
+        const { data: profile } = await connection_1.supabase
+            .from('profiles')
+            .select('semester_start, semester_end')
+            .eq('id', userId)
+            .maybeSingle();
+        let refDate = nowWib;
+        if (profile?.semester_start && profile?.semester_end) {
+            const todayStr = nowWib.toISOString().split('T')[0];
+            if (todayStr < profile.semester_start) {
+                const [sy, sm, sd] = profile.semester_start.split('-').map(Number);
+                refDate = new Date(Date.UTC(sy, sm - 1, sd));
+            }
+            else if (todayStr > profile.semester_end) {
+                const [ey, em, ed] = profile.semester_end.split('-').map(Number);
+                refDate = new Date(Date.UTC(ey, em - 1, ed));
+            }
+        }
+        let currentDay = refDate.getUTCDay();
         if (currentDay === 0)
             currentDay = 7;
         const diff = Number(hari_mingguan) - currentDay;
-        const checkDate = new Date(nowWib);
+        const checkDate = new Date(refDate);
         checkDate.setUTCDate(checkDate.getUTCDate() + diff);
         const dateStr = checkDate.toISOString().split('T')[0];
         const normStart = String(jam_mulai).length === 5 ? `${jam_mulai}:00` : String(jam_mulai);

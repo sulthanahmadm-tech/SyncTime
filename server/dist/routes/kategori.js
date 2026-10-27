@@ -23,11 +23,11 @@ router.get('/', async (req, res, next) => {
             ];
             const { data: insertedData, error: insertError } = await connection_1.supabase
                 .from('kategori')
-                .insert(defaultCategories)
+                .upsert(defaultCategories, { onConflict: 'user_id,nama_kategori', ignoreDuplicates: true })
                 .select('*');
             if (insertError)
                 throw insertError;
-            data = insertedData;
+            data = insertedData && insertedData.length > 0 ? insertedData : (await connection_1.supabase.from('kategori').select('*').eq('user_id', userId).order('id', { ascending: true })).data;
         }
         res.json(data);
     }

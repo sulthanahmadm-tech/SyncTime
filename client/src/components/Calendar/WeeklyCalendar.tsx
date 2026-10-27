@@ -249,7 +249,12 @@ export const WeeklyCalendar = ({
         <div className={`flex flex-1 ${isCompactMobileMode ? 'min-w-0 w-full' : 'min-w-max'}`}>
           {visibleDays.map((date) => {
             const dateStr = getLocalDateString(date);
-            const dayBlocks = blocks.filter(b => b.start.startsWith(dateStr));
+            const dayBlocks = blocks.filter(b => {
+              if (b.start.includes('Z') || b.start.includes('+')) {
+                return getLocalDateString(new Date(b.start)) === dateStr;
+              }
+              return b.start.startsWith(dateStr) || getLocalDateString(new Date(b.start)) === dateStr;
+            });
             return (
               <DayColumn
                 key={dateStr}

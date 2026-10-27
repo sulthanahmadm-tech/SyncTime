@@ -27,13 +27,16 @@ router.put('/move', async (req: AuthenticatedRequest, res, next) => {
         }
       }
 
-      const { error } = await supabase
+      const { data: updatedDinamis, error } = await supabase
         .from('kegiatan_dinamis')
         .update({ waktu_mulai: newStartIso, waktu_selesai: newEndIso })
         .eq('id', id)
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .select()
+        .maybeSingle();
 
       if (error) throw error;
+      if (!updatedDinamis) return res.status(404).json({ error: 'Kegiatan dinamis tidak ditemukan' });
       return res.json({ message: 'Kegiatan dinamis berhasil dipindahkan' });
     }
 
@@ -41,14 +44,14 @@ router.put('/move', async (req: AuthenticatedRequest, res, next) => {
       if (!isTemporary) {
         // Permanent move
         const [y, m, d] = newDate.split('-').map(Number);
-        const dateObj = new Date(y, m - 1, d);
-        let hariMingguan = dateObj.getDay() === 0 ? 7 : dateObj.getDay();
+        const dateUtc = new Date(Date.UTC(y, m - 1, d));
+        let hariMingguan = dateUtc.getUTCDay() === 0 ? 7 : dateUtc.getUTCDay();
 
         const jamMulai = newStartTime.includes('T') ? newStartTime.split('T')[1].substring(0, 8) : newStartTime.substring(0, 8);
         const jamSelesai = newEndTime.includes('T') ? newEndTime.split('T')[1].substring(0, 8) : newEndTime.substring(0, 8);
 
-        const start = new Date(newStartIso || `${newDate}T${jamMulai}`);
-        const end = new Date(newEndIso || `${newDate}T${jamSelesai}`);
+        const start = new Date(newStartIso || `${newDate}T${jamMulai}+07:00`);
+        const end = new Date(newEndIso || `${newDate}T${jamSelesai}+07:00`);
 
         if (force !== 'true' && force !== true) {
           const check = await checkConflicts(userId, { start, end, excludeId: Number(id), excludeType: 'rutin' });
@@ -57,13 +60,16 @@ router.put('/move', async (req: AuthenticatedRequest, res, next) => {
           }
         }
 
-        const { error } = await supabase
+        const { data: updatedRutin, error } = await supabase
           .from('kegiatan_rutin')
           .update({ hari_mingguan: hariMingguan, jam_mulai: jamMulai, jam_selesai: jamSelesai })
           .eq('id', id)
-          .eq('user_id', userId);
+          .eq('user_id', userId)
+          .select()
+          .maybeSingle();
 
         if (error) throw error;
+        if (!updatedRutin) return res.status(404).json({ error: 'Kegiatan rutin tidak ditemukan' });
         return res.json({ message: 'Kegiatan rutin berhasil dipindahkan permanen' });
       } else {
         // Temporary move

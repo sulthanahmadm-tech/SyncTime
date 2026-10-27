@@ -46,13 +46,17 @@ const LoginPage = () => {
           }
         }
       } else {
-        const { error } = await signUp(email, password);
+        const { data, error } = await signUp(email, password);
         if (error) throw error;
-        // Inform student that account is created and onboarding is required
-        setInfoMessage('Akun kamu berhasil dibuat! Mengarahkan ke halaman onboarding untuk melengkapi data semester dan jadwal kuliah...');
-        setTimeout(() => {
-          navigate('/onboarding');
-        }, 1200);
+        if (data?.session) {
+          setInfoMessage('Akun kamu berhasil dibuat! Mengarahkan ke halaman onboarding untuk melengkapi data semester dan jadwal kuliah...');
+          setTimeout(() => {
+            navigate('/onboarding');
+          }, 1200);
+        } else {
+          setInfoMessage('Akun berhasil dibuat! Silakan periksa inbox email Anda untuk verifikasi pendaftaran sebelum masuk.');
+          setIsLogin(true);
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan');

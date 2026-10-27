@@ -9,9 +9,11 @@
 
 -- ========== PROFILES ==========
 DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
 DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING ((select auth.uid()) = id);
+CREATE POLICY "Users can insert own profile" ON profiles FOR INSERT WITH CHECK ((select auth.uid()) = id);
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING ((select auth.uid()) = id);
 
 -- ========== KATEGORI ==========
@@ -85,6 +87,7 @@ CREATE POLICY "Users can delete own rutin exceptions" ON rutin_exceptions FOR DE
 -- ========== PERFORMANCE INDEXES ==========
 CREATE INDEX IF NOT EXISTS idx_kategori_user_id ON public.kategori(user_id);
 CREATE INDEX IF NOT EXISTS idx_kegiatan_rutin_user_id ON public.kegiatan_rutin(user_id);
+CREATE INDEX IF NOT EXISTS idx_kegiatan_rutin_user_hari ON public.kegiatan_rutin(user_id, hari_mingguan);
 CREATE INDEX IF NOT EXISTS idx_kegiatan_rutin_kategori_id ON public.kegiatan_rutin(kategori_id);
 CREATE INDEX IF NOT EXISTS idx_kegiatan_dinamis_user_id ON public.kegiatan_dinamis(user_id);
 CREATE INDEX IF NOT EXISTS idx_kegiatan_dinamis_kategori_id ON public.kegiatan_dinamis(kategori_id);
@@ -92,9 +95,18 @@ CREATE INDEX IF NOT EXISTS idx_kegiatan_dinamis_waktu ON public.kegiatan_dinamis
 CREATE INDEX IF NOT EXISTS idx_rutin_exceptions_rutin_id ON public.rutin_exceptions(kegiatan_rutin_id);
 CREATE INDEX IF NOT EXISTS idx_rutin_exceptions_lookup ON public.rutin_exceptions(kegiatan_rutin_id, tanggal_dilewati);
 
--- ========== CONSTRAINTS ==========
+-- ========== CONSTRAINTS & DEDUPLICATION ==========
+DELETE FROM public.kategori a USING public.kategori b
+WHERE a.id > b.id AND a.user_id = b.user_id AND a.nama_kategori = b.nama_kategori;
+
 DO $$
 BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'uq_kategori_user_nama'
+  ) THEN
+    ALTER TABLE public.kategori ADD CONSTRAINT uq_kategori_user_nama UNIQUE (user_id, nama_kategori);
+  END IF;
+
   IF NOT EXISTS (
     SELECT 1 FROM pg_constraint WHERE conname = 'uq_rutin_exception'
   ) THEN
@@ -103,5 +115,6 @@ BEGIN
 END $$;
 
 -- =============================================
--- Selesai! Semua 18 policy dan indeks performa sudah siap.
+-- Selesai! Semua 19 policy dan indeks performa sudah siap.
 -- =============================================
+
