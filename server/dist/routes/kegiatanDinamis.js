@@ -87,7 +87,7 @@ router.put('/:id', async (req, res, next) => {
             .eq('id', Number(id))
             .eq('user_id', userId)
             .select()
-            .single();
+            .maybeSingle();
         if (error)
             throw error;
         if (!data)
@@ -107,7 +107,7 @@ router.patch('/:id/complete', async (req, res, next) => {
             .select('is_completed')
             .eq('id', Number(id))
             .eq('user_id', userId)
-            .single();
+            .maybeSingle();
         if (getError || !current)
             return res.status(404).json({ error: 'Not found' });
         const newVal = !current.is_completed;
@@ -117,7 +117,7 @@ router.patch('/:id/complete', async (req, res, next) => {
             .eq('id', Number(id))
             .eq('user_id', userId)
             .select()
-            .single();
+            .maybeSingle();
         if (error)
             throw error;
         res.json(data);

@@ -19,7 +19,7 @@ router.put('/semester', async (req, res, next) => {
             .update({ semester_start, semester_end })
             .eq('id', userId)
             .select()
-            .single();
+            .maybeSingle();
         if (error)
             throw error;
         res.json(data);
@@ -43,14 +43,26 @@ router.post('/matkul', async (req, res, next) => {
                 return res.status(400).json({ error: `jam_selesai must be greater than jam_mulai for ${m.judul || 'matkul'}` });
             }
         }
-        // Get the 'Kuliah' category for this user
-        const { data: kuliahKategori, error: katError } = await connection_1.supabase
+        // Get the 'Kuliah' category for this user (auto-heal if empty)
+        let { data: userCategories } = await connection_1.supabase
             .from('kategori')
-            .select('id')
-            .eq('user_id', userId)
-            .eq('nama_kategori', 'Kuliah')
-            .single();
-        if (katError || !kuliahKategori) {
+            .select('id, nama_kategori')
+            .eq('user_id', userId);
+        if (!userCategories || userCategories.length === 0) {
+            const defaultCategories = [
+                { user_id: userId, nama_kategori: 'Kuliah', warna_hex: '#EF4444' },
+                { user_id: userId, nama_kategori: 'Acara Kampus', warna_hex: '#F59E0B' },
+                { user_id: userId, nama_kategori: 'Tugas', warna_hex: '#3B82F6' },
+                { user_id: userId, nama_kategori: 'Downtime', warna_hex: '#22C55E' }
+            ];
+            const { data: createdCats } = await connection_1.supabase
+                .from('kategori')
+                .insert(defaultCategories)
+                .select('id, nama_kategori');
+            userCategories = createdCats || [];
+        }
+        const kuliahKategori = userCategories?.find(k => k.nama_kategori.toLowerCase() === 'kuliah') || userCategories?.[0];
+        if (!kuliahKategori) {
             return res.status(400).json({ error: 'Kategori Kuliah not found for this user' });
         }
         // Get semester info for batas_minggu calculation
@@ -58,7 +70,7 @@ router.post('/matkul', async (req, res, next) => {
             .from('profiles')
             .select('semester_start, semester_end')
             .eq('id', userId)
-            .single();
+            .maybeSingle();
         let batasMinggu = 16;
         if (profile?.semester_start && profile?.semester_end) {
             const start = new Date(profile.semester_start);
@@ -97,7 +109,7 @@ router.put('/complete', async (req, res, next) => {
             .update({ onboarding_completed: true })
             .eq('id', userId)
             .select()
-            .single();
+            .maybeSingle();
         if (error)
             throw error;
         res.json(data);

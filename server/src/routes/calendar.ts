@@ -24,7 +24,7 @@ router.get('/weekly', async (req: AuthenticatedRequest, res, next) => {
       .from('profiles')
       .select('semester_start, semester_end')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     const { data: rutinRes, error: rutinError } = await supabase
       .from('kegiatan_rutin')

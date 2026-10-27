@@ -8,13 +8,25 @@ const router = Router();
 router.get('/profile', async (req: AuthenticatedRequest, res, next) => {
   try {
     const userId = req.user!.id;
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+
+    // Auto-heal: If profile was not created by auth trigger, create it now
+    if (!data) {
+      const { data: newProfile, error: insertError } = await supabase
+        .from('profiles')
+        .insert({ id: userId, email: req.user!.email })
+        .select()
+        .maybeSingle();
+      if (insertError) throw insertError;
+      data = newProfile;
+    }
+
     res.json(data);
   } catch (err) {
     next(err);
@@ -37,7 +49,7 @@ router.put('/profile', async (req: AuthenticatedRequest, res, next) => {
       .update(updateData)
       .eq('id', userId)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     res.json(data);

@@ -63,7 +63,7 @@ router.put('/:id', async (req, res, next) => {
             .eq('id', Number(id))
             .eq('user_id', userId)
             .select()
-            .single();
+            .maybeSingle();
         if (error)
             throw error;
         if (!data)

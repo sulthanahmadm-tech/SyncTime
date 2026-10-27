@@ -61,3 +61,9 @@ export interface ConflictCheckResult {
   hasConflict: boolean;
   conflicts: ConflictDetail[];
 }
+
+export interface RutinException {
+  id: number;
+  kegiatan_rutin_id: number;
+  tanggal_dilewati: string;
+}

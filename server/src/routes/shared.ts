@@ -12,6 +12,11 @@ router.get('/free-time', async (req, res, next) => {
     return res.status(400).json({ error: 'user_id query param is required' });
   }
 
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(user_id)) {
+    return res.status(400).json({ error: 'Invalid user_id format' });
+  }
+
   try {
     const start = new Date(week_start);
     const end = new Date(start);
@@ -33,7 +38,7 @@ router.get('/free-time', async (req, res, next) => {
       .from('profiles')
       .select('semester_start, semester_end')
       .eq('id', user_id)
-      .single();
+      .maybeSingle();
 
     // Get rutin
     const { data: rutinRes } = await supabase

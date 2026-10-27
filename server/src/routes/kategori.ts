@@ -66,7 +66,7 @@ router.put('/:id', async (req: AuthenticatedRequest, res, next) => {
       .eq('id', Number(id))
       .eq('user_id', userId)
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
     if (!data) return res.status(404).json({ error: 'Kategori not found' });
     res.json(data);

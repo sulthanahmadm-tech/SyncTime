@@ -53,3 +53,9 @@ export interface ConflictDetail {
   conflicting_end: string;
   type: 'rutin' | 'dinamis';
 }
+
+export interface RutinException {
+  id: number;
+  kegiatan_rutin_id: number;
+  tanggal_dilewati: string;
+}

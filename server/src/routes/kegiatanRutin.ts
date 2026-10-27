@@ -128,13 +128,18 @@ router.put('/:id', async (req: AuthenticatedRequest, res, next) => {
       return res.status(409).json(check);
     }
 
+    const updatePayload: any = { kategori_id, judul, hari_mingguan, jam_mulai, jam_selesai, batas_minggu_berulang };
+    if (req.body.is_matkul_wajib !== undefined) {
+      updatePayload.is_matkul_wajib = Boolean(req.body.is_matkul_wajib);
+    }
+
     const { data, error } = await supabase
       .from('kegiatan_rutin')
-      .update({ kategori_id, judul, hari_mingguan, jam_mulai, jam_selesai, batas_minggu_berulang })
+      .update(updatePayload)
       .eq('id', Number(id))
       .eq('user_id', userId)
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
     if (!data) return res.status(404).json({ error: 'Not found' });
     res.json(data);

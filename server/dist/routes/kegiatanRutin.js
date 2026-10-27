@@ -123,13 +123,17 @@ router.put('/:id', async (req, res, next) => {
         if (check.hasConflict && force !== 'true') {
             return res.status(409).json(check);
         }
+        const updatePayload = { kategori_id, judul, hari_mingguan, jam_mulai, jam_selesai, batas_minggu_berulang };
+        if (req.body.is_matkul_wajib !== undefined) {
+            updatePayload.is_matkul_wajib = Boolean(req.body.is_matkul_wajib);
+        }
         const { data, error } = await connection_1.supabase
             .from('kegiatan_rutin')
-            .update({ kategori_id, judul, hari_mingguan, jam_mulai, jam_selesai, batas_minggu_berulang })
+            .update(updatePayload)
             .eq('id', Number(id))
             .eq('user_id', userId)
             .select()
-            .single();
+            .maybeSingle();
         if (error)
             throw error;
         if (!data)

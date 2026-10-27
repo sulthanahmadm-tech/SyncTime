@@ -47,11 +47,12 @@ export async function checkConflicts(
     .from('profiles')
     .select('semester_start, semester_end')
     .eq('id', userId)
-    .single();
+    .maybeSingle();
 
   const { data: exceptionsRes } = await supabase
     .from('rutin_exceptions')
-    .select('kegiatan_rutin_id')
+    .select('kegiatan_rutin_id, kegiatan_rutin!inner(user_id)')
+    .eq('kegiatan_rutin.user_id', userId)
     .eq('tanggal_dilewati', wibDateStr);
 
   const exceptionIds = new Set((exceptionsRes || []).map((e: any) => e.kegiatan_rutin_id));

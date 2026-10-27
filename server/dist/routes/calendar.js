@@ -19,7 +19,7 @@ router.get('/weekly', async (req, res, next) => {
             .from('profiles')
             .select('semester_start, semester_end')
             .eq('id', userId)
-            .single();
+            .maybeSingle();
         const { data: rutinRes, error: rutinError } = await connection_1.supabase
             .from('kegiatan_rutin')
             .select('*, kategori!inner(warna_hex, nama_kategori)')

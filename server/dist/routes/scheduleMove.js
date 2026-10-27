@@ -75,16 +75,24 @@ router.put('/move', async (req, res, next) => {
                     .select('*')
                     .eq('id', id)
                     .eq('user_id', userId)
-                    .single();
+                    .maybeSingle();
                 if (fetchError || !rutinEvent) {
                     return res.status(404).json({ error: 'Kegiatan rutin not found' });
                 }
-                // Insert exception
-                const { error: excError } = await connection_1.supabase
+                // Insert exception if not already recorded
+                const { data: existingExc } = await connection_1.supabase
                     .from('rutin_exceptions')
-                    .insert({ kegiatan_rutin_id: id, tanggal_dilewati: originalDate });
-                if (excError)
-                    throw excError;
+                    .select('id')
+                    .eq('kegiatan_rutin_id', id)
+                    .eq('tanggal_dilewati', originalDate)
+                    .maybeSingle();
+                if (!existingExc) {
+                    const { error: excError } = await connection_1.supabase
+                        .from('rutin_exceptions')
+                        .insert({ kegiatan_rutin_id: id, tanggal_dilewati: originalDate });
+                    if (excError)
+                        throw excError;
+                }
                 // Insert temporary dinamis
                 const { error: dinError } = await connection_1.supabase
                     .from('kegiatan_dinamis')

@@ -1,9 +1,10 @@
 -- =============================================
--- MIGRASI RLS: Optimasi Performa auth.uid()
+-- MIGRASI RLS & PERFORMA SUPABASE
 -- Jalankan di Supabase Dashboard > SQL Editor
 -- =============================================
--- Masalah: auth.uid() dievaluasi ulang per baris (lambat)
--- Solusi: (select auth.uid()) dievaluasi sekali saja (cepat)
+-- 1. Optimasi auth.uid(): (select auth.uid()) dievaluasi sekali saja per query
+-- 2. Performance Indexes pada foreign keys
+-- 3. Unique constraint pada rutin_exceptions
 -- =============================================
 
 -- ========== PROFILES ==========
@@ -81,7 +82,26 @@ CREATE POLICY "Users can delete own rutin exceptions" ON rutin_exceptions FOR DE
   )
 );
 
+-- ========== PERFORMANCE INDEXES ==========
+CREATE INDEX IF NOT EXISTS idx_kategori_user_id ON public.kategori(user_id);
+CREATE INDEX IF NOT EXISTS idx_kegiatan_rutin_user_id ON public.kegiatan_rutin(user_id);
+CREATE INDEX IF NOT EXISTS idx_kegiatan_rutin_kategori_id ON public.kegiatan_rutin(kategori_id);
+CREATE INDEX IF NOT EXISTS idx_kegiatan_dinamis_user_id ON public.kegiatan_dinamis(user_id);
+CREATE INDEX IF NOT EXISTS idx_kegiatan_dinamis_kategori_id ON public.kegiatan_dinamis(kategori_id);
+CREATE INDEX IF NOT EXISTS idx_kegiatan_dinamis_waktu ON public.kegiatan_dinamis(user_id, waktu_mulai, waktu_selesai);
+CREATE INDEX IF NOT EXISTS idx_rutin_exceptions_rutin_id ON public.rutin_exceptions(kegiatan_rutin_id);
+CREATE INDEX IF NOT EXISTS idx_rutin_exceptions_lookup ON public.rutin_exceptions(kegiatan_rutin_id, tanggal_dilewati);
+
+-- ========== CONSTRAINTS ==========
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'uq_rutin_exception'
+  ) THEN
+    ALTER TABLE public.rutin_exceptions ADD CONSTRAINT uq_rutin_exception UNIQUE (kegiatan_rutin_id, tanggal_dilewati);
+  END IF;
+END $$;
+
 -- =============================================
--- Selesai! Semua 18 policy sudah dioptimasi.
--- Jalankan Supabase Linter lagi untuk verifikasi.
+-- Selesai! Semua 18 policy dan indeks performa sudah siap.
 -- =============================================

@@ -32,7 +32,7 @@ router.get('/weekly', async (req, res, next) => {
             .from('profiles')
             .select('semester_start, semester_end')
             .eq('id', userId)
-            .single();
+            .maybeSingle();
         const startDateStr = start.toISOString().split('T')[0];
         const endDateStr = end.toISOString().split('T')[0];
         const { data: exceptionsRes, error: exceptionsError } = await connection_1.supabase
